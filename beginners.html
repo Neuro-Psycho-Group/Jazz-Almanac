@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>For Beginners — Jazz Almanac</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/nav.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <style>
+    .beg-section { padding: 4rem 0; }
+    .beg-section:nth-child(odd) { background: var(--paper); }
+
+    /* Piano keyboard */
+    .piano-container {
+      text-align: center;
+      margin: 2.5rem 0;
+      overflow-x: auto;
+    }
+    .piano-keyboard {
+      display: inline-flex;
+      position: relative;
+      height: 130px;
+      user-select: none;
+      filter: drop-shadow(0 8px 20px rgba(28,16,8,0.2));
+    }
+    .piano-key {
+      position: relative;
+      border: 1px solid #aaa;
+      border-radius: 0 0 4px 4px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .piano-key.white {
+      width: 36px;
+      height: 130px;
+      background: #fafafa;
+      z-index: 1;
+      border-color: #888;
+    }
+    .piano-key.white:hover, .piano-key.white.pressed {
+      background: #f0e8d0;
+    }
+    .piano-key.black {
+      width: 22px;
+      height: 80px;
+      background: var(--ink);
+      z-index: 2;
+      margin-left: -11px;
+      margin-right: -11px;
+      border-radius: 0 0 3px 3px;
+    }
+    .piano-key.black:hover, .piano-key.black.pressed {
+      background: var(--ink-soft);
+    }
+    .piano-key .key-label {
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.55rem;
+      font-family: var(--font-mono);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    .piano-key.black .key-label { color: rgba(250,245,232,0.4); bottom: 4px; font-size: 0.45rem; }
+    .piano-key.highlight-gold .key-label { color: var(--gold-dk); font-weight: 700; }
+    .piano-key.highlight-gold { background: rgba(184,131,42,0.25) !important; }
+    .piano-key.highlight-teal { background: rgba(26,92,107,0.2) !important; }
+    .piano-key.highlight-teal .key-label { color: var(--teal); font-weight: 700; }
+
+    /* Step-by-step path */
+    .learning-path {
+      counter-reset: step;
+    }
+    .step-card {
+      counter-increment: step;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 2rem 2rem 4.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .step-card::before {
+      content: counter(step);
+      position: absolute;
+      left: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--gold);
+      opacity: 0.3;
+      line-height: 1;
+    }
+    .step-card h4 { font-size: 1.1rem; margin-bottom: 0.4rem; }
+    .step-card p { font-size: 0.92rem; margin: 0; }
+    .step-card .step-time {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Mindset comparison */
+    .mindset-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+    @media (max-width: 600px) { .mindset-grid { grid-template-columns: 1fr; } }
+    .mindset-col {
+      padding: 1.5rem;
+      border-radius: var(--radius);
+    }
+    .mindset-col.classical {
+      background: rgba(139,58,42,0.08);
+      border: 1px solid rgba(139,58,42,0.2);
+    }
+    .mindset-col.jazz {
+      background: rgba(26,92,107,0.08);
+      border: 1px solid rgba(26,92,107,0.2);
+    }
+    .mindset-col h4 {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .mindset-col.classical h4 { color: var(--rust); }
+    .mindset-col.jazz h4 { color: var(--teal); }
+    .mindset-item {
+      font-size: 0.88rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(200,169,110,0.15);
+      line-height: 1.5;
+    }
+    .mindset-item:last-child { border-bottom: none; }
+
+    /* Practice routine */
+    .routine-block {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    .routine-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: var(--bg-dark);
+      cursor: pointer;
+    }
+    .routine-header h4 { font-size: 1rem; margin: 0; }
+    .routine-header .routine-time {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+    }
+    .routine-body {
+      padding: 1.5rem;
+      display: none;
+    }
+    .routine-body.open { display: block; }
+    .routine-body p { font-size: 0.9rem; margin-bottom: 0.75rem; }
+    .routine-body p:last-child { margin: 0; }
+
+    /* Standards list */
+    .standards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .standard-card {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius);
+      border-left: 4px solid var(--gold);
+    }
+    .standard-card .std-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .standard-card .std-level { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    .standard-card .std-level.beginner { color: #5A7A3A; }
+    .standard-card .std-level.intermediate { color: var(--gold-dk); }
+    .standard-card p { font-size: 0.82rem; color: var(--muted); margin: 0; }
+
+    /* Chord voicing diagram */
+    .voicing-display {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin: 1.5rem 0;
+    }
+    .voicing-item {
+      text-align: center;
+    }
+    .voicing-item .v-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .voicing-notes {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 2px;
+    }
+    .v-note {
+      background: var(--ink);
+      color: var(--gold-lt);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 0.2em 0.8em;
+      border-radius: 1px;
+      min-width: 50px;
+    }
+    .v-note.lh { background: var(--teal); }
+    .v-note.shell { background: var(--gold-dk); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-note">♪</span> Jazz Almanac</a>
+    <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="styles-players.html">Styles &amp; Players</a></li>
+      <li><a href="theory.html">Theory</a></li>
+      <li><a href="beginners.html">For Beginners</a></li>
+      <li><a href="neuroscience.html">Neuroscience</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+
+  <div class="section-hero">
+    <div class="deco-corner tl"></div>
+    <div class="deco-corner br"></div>
+    <div class="container">
+      <span class="subtitle">Start Here</span>
+      <h1>Jazz for the <em>Classical Musician</em></h1>
+      <p>You can already play. Now learn to <em>listen and respond</em>. This guide is written for you specifically — technically trained, harmonically literate, and completely lost at a jam session.</p>
+    </div>
+  </div>
+
+  <!-- THE MINDSET SHIFT -->
+  <section class="beg-section">
+    <div class="container">
+      <h2 class="reveal">First: The Mindset Shift</h2>
+      <p class="reveal">The hardest part of jazz for classical musicians is not technical — it's psychological. Your entire musical training has been built around <em>accuracy to a text</em>. Jazz asks you to <em>become the composer in real time</em>. This is a profound shift.</p>
+
+      <div class="mindset-grid reveal">
+        <div class="mindset-col classical">
+          <h4>🎼 Classical Mindset</h4>
+          <div class="mindset-item">The score is the music — serve it faithfully</div>
+          <div class="mindset-item">Wrong notes are failures</div>
+          <div class="mindset-item">Technique in service of the composer's vision</div>
+          <div class="mindset-item">Interpretation within boundaries set by the text</div>
+          <div class="mindset-item">Practise until perfect, then perform</div>
+          <div class="mindset-item">Silence between notes is "empty"</div>
+          <div class="mindset-item">Metre is conducted, subdivided, controlled</div>
+        </div>
+        <div class="mindset-col jazz">
+          <h4>🎵 Jazz Mindset</h4>
+          <div class="mindset-item">The "changes" are a framework — your voice is the music</div>
+          <div class="mindset-item">There are no wrong notes, only notes that resolve unexpectedly</div>
+          <div class="mindset-item">Technique in service of spontaneous expression</div>
+          <div class="mindset-item">Interpretation is creation — invent it fresh every night</div>
+          <div class="mindset-item">Perform with mistakes, learn through the performance</div>
+          <div class="mindset-item">Silence is musical — the note you don't play is important</div>
+          <div class="mindset-item">Metre is felt, swung, pushed and pulled</div>
+        </div>
+      </div>
+
+      <div class="tip-box reveal">
+        <div class="tip-label">The Classical Pianist's Specific Challenge</div>
+        <p>Classical pianists tend to be harmonically sophisticated but rhythmically stiff. Your chord knowledge will accelerate your jazz development. Your tendency to play "in the beat" rather than <em>swinging</em> will be your obstacle. The fix: <strong>listen to recordings obsessively, and clap along before you play along</strong>. Swing must enter your body before it enters your hands.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERACTIVE PIANO -->
+  <section class="beg-section">
+    <div class="container">
+      <h2 class="reveal">Understanding Jazz Voicings on the Piano</h2>
+      <p class="reveal">Jazz piano voicings look different from classical chord positions. Here's the core principle: <strong>shell voicings</strong> — left hand plays root + 7th (or 3rd), right hand adds colour and melody.</p>
+
+      <div class="piano-container reveal">
+        <p style="font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem;">Cmaj7 — interactive piano (click keys)</p>
+        <div class="piano-keyboard" id="piano-demo">
+          <!-- White keys with embedded black keys -->
+          <div class="piano-key white highlight-gold" data-note="C"><span class="key-label">C<br/>root</span></div>
+          <div class="piano-key black" data-note="Cs"><span class="key-label">C♯</span></div>
+          <div class="piano-key white" data-note="D"><span class="key-label">D</span></div>
+          <div class="piano-key black" data-note="Ds"><span class="key-label">D♯</span></div>
+          <div class="piano-key white highlight-teal" data-note="E"><span class="key-label">E<br/>3rd</span></div>
+          <div class="piano-key white" data-note="F"><span class="key-label">F</span></div>
+          <div class="piano-key black" data-note="Fs"><span class="key-label">F♯</span></div>
+          <div class="piano-key white" data-note="G"><span class="key-label">G<br/>5th</span></div>
+          <div class="piano-key black" data-note="Gs"><span class="key-label">G♯</span></div>
+          <div class="piano-key white" data-note="A"><span class="key-label">A</span></div>
+          <div class="piano-key black" data-note="As"><span class="key-label">A♯</span></div>
+          <div class="piano-key white highlight-gold" data-note="B"><span class="key-label">B<br/>7th</span></div>
+          <div class="piano-key white highlight-teal" data-note="C2"><span class="key-label">C<br/>oct</span></div>
+        </div>
+        <p style="font-size:0.82rem;color:var(--muted);margin-top:0.75rem;">Gold = root &amp; 7th (shell) · Teal = 3rd &amp; colour notes · Click to highlight</p>
+      </div>
+
+      <h3 class="reveal mt-4">Shell Voicing Examples</h3>
+      <p class="reveal">Jazz pianists typically don't play full root-position chords. They use "shells" — the essential guide tones — and distribute between hands. This leaves room for the bass player.</p>
+
+      <div class="voicing-display reveal">
+        <div class="voicing-item">
+          <div class="v-label">Cmaj7 — Full</div>
+          <div class="voicing-notes">
+            <div class="v-note">B (7th)</div>
+            <div class="v-note">G (5th)</div>
+            <div class="v-note">E (3rd)</div>
+            <div class="v-note">C (root)</div>
+          </div>
+        </div>
+        <div class="voicing-item">
+          <div class="v-label">Shell (LH)</div>
+          <div class="voicing-notes">
+            <div class="v-note lh">E (3rd)</div>
+            <div class="v-note lh">C (root)</div>
+          </div>
+        </div>
+        <div class="voicing-item">
+          <div class="v-label">Cmaj9 — Jazz</div>
+          <div class="voicing-notes">
+            <div class="v-note">D (9th)</div>
+            <div class="v-note">B (7th)</div>
+            <div class="v-note">G (5th)</div>
+            <div class="v-note shell">E (3rd)</div>
+            <div class="v-note shell">C (root)</div>
+          </div>
+        </div>
+        <div class="voicing-item">
+          <div class="v-label">LH-only shell</div>
+          <div class="voicing-notes">
+            <div class="v-note lh">B (7th)</div>
+            <div class="v-note lh">C (root)</div>
+          </div>
+        </div>
+        <div class="voicing-item">
+          <div class="v-label">Rootless voicing</div>
+          <div class="voicing-notes">
+            <div class="v-note">A (13th)</div>
+            <div class="v-note">D (9th)</div>
+            <div class="v-note">B (7th)</div>
+            <div class="v-note">E (3rd)</div>
+          </div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:0.3rem;">No root! Bass plays it.</div>
+        </div>
+      </div>
+
+      <div class="info-box reveal">
+        <div class="info-label">The Rootless Voicing Rule</div>
+        <p>Once you have a bassist, you don't need to play the root with your left hand. <strong>Rootless voicings</strong> (playing only the 3rd, 7th, and extensions) are cleaner, less muddy, and leave the bass player freedom. Bill Evans built a career partly on this principle.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEARNING PATH -->
+  <section class="beg-section">
+    <div class="container">
+      <h2 class="reveal">Your Learning Path — Step by Step</h2>
+      <p class="reveal">Here's a practical sequence, designed specifically for the classically trained pianist. Expect each stage to take weeks to months — not hours.</p>
+
+      <div class="learning-path reveal">
+        <div class="step-card">
+          <div class="step-time">Month 1–2</div>
+          <h4>Listening — Before You Play Anything</h4>
+          <p>Listen to jazz obsessively. Pick one album per week and listen every day. Start with: <em>Kind of Blue</em> (Miles Davis), <em>Time Out</em> (Dave Brubeck), <em>Bill Evans at the Village Vanguard</em>. Notice: the rhythm feel, how pianists voice chords, when musicians leave space. Don't play anything yet — just listen.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-time">Month 2–3</div>
+          <h4>Learn the ii–V–I in All 12 Keys</h4>
+          <p>With your classical background, you'll grasp this quickly intellectually. The challenge is making it fluid and musical. Practice: Dm7 – G7 – Cmaj7, then E♭m7 – A♭7 – D♭maj7, etc. around the circle of fifths. Use shell voicings, then rootless voicings. Play them until they feel like home, not like homework.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-time">Month 3–4</div>
+          <h4>Learn Your First Standard: "Autumn Leaves"</h4>
+          <p>This is the canonical first standard for a reason. It contains ii-V-I progressions in both major and minor, it's melodically simple enough to memorise quickly, and it exists in thousands of recordings. Learn the melody by ear first, then find the chords. Play along with a recording — don't look at sheet music.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-time">Month 4–6</div>
+          <h4>Start Transcribing — The Jazz Method</h4>
+          <p>In jazz, you learn to improvise by learning what other improvisers played and internalising it until it becomes your own vocabulary. Pick a solo (Bill Evans on "Peace Piece" is a good start — it's relatively slow and spacious), transcribe 8 bars by ear, and learn to play it. This trains your ear and fills your vocabulary simultaneously.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-time">Month 5–8</div>
+          <h4>Begin Improvising — Over a Blues First</h4>
+          <p>Your first real improvisation lab should be a 12-bar blues. The form is fixed and short (12 bars repeat), and you can use the blues scale or Mixolydian scale throughout. Record yourself. Listen back. This is uncomfortable — do it anyway. Every jazz musician played terrible solos before good ones.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-time">Month 8+</div>
+          <h4>Take the Music to Other People</h4>
+          <p>Find a jazz jam session. Sit in. It will be terrifying. Do it. You'll learn more in one jam session than in weeks of practice. The social/interactive element of jazz is not optional — it's the art form. Real jazz is played with other humans, in real time, responding to each other. That's the whole point.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRACTICE ROUTINES -->
+  <section class="beg-section">
+    <div class="container">
+      <h2 class="reveal">Daily Practice Routines</h2>
+      <p class="reveal">Jazz practice is different from classical practice. You're not perfecting a fixed text — you're building vocabulary, ear, and spontaneity. Here's how to structure your time.</p>
+
+      <div class="reveal" id="routine-accordion">
+
+        <div class="routine-block">
+          <div class="routine-header" onclick="toggleRoutine(this)">
+            <h4>🌅 30-Minute Daily Minimum</h4>
+            <span class="routine-time">30 min</span>
+          </div>
+          <div class="routine-body">
+            <p><strong>10 min:</strong> Ear training — sing along with a jazz recording. Match the melody, then the bass line. Don't touch the piano.</p>
+            <p><strong>10 min:</strong> ii-V-I practice — two keys per day, through all 12 over six days. Focus on voice-leading (minimal hand movement between chords).</p>
+            <p><strong>10 min:</strong> One standard — play the melody (RH only), then comp the chords (LH, rootless), then try both together.</p>
+          </div>
+        </div>
+
+        <div class="routine-block">
+          <div class="routine-header" onclick="toggleRoutine(this)">
+            <h4>⏱ 1-Hour Focused Session</h4>
+            <span class="routine-time">60 min</span>
+          </div>
+          <div class="routine-body">
+            <p><strong>15 min:</strong> Transcription — learn 4–8 bars of a solo from a recording. Slow it down, learn each note. Sing it before playing it.</p>
+            <p><strong>15 min:</strong> Scales/modes — play Dorian in all 12 keys, then Mixolydian. Connect them to the ii-V-I (Dm Dorian → G Mixolydian → C Ionian).</p>
+            <p><strong>15 min:</strong> Improvisation practice — set a metronome at a comfortable tempo, play a 12-bar blues. Allow silence. Don't force notes. Listen to the spaces.</p>
+            <p><strong>15 min:</strong> Standard — work on the full arrangement of one tune. Melody, chords, bass line (LH). Try to play it without the sheet.</p>
+          </div>
+        </div>
+
+        <div class="routine-block">
+          <div class="routine-header" onclick="toggleRoutine(this)">
+            <h4>🎯 Advanced: 2-Hour Deep Work</h4>
+            <span class="routine-time">2 hrs</span>
+          </div>
+          <div class="routine-body">
+            <p><strong>20 min:</strong> Transcription (1 chorus of a solo).</p>
+            <p><strong>20 min:</strong> Play that transcription in a different key. This forces genuine internalisation.</p>
+            <p><strong>20 min:</strong> Tritone substitutions and altered dominants — take 3 standards and reharmonise the V7 chords using tritone subs.</p>
+            <p><strong>20 min:</strong> Free improvisation — no chord changes, no form. Just explore. Allow "ugly" sounds. Some of them will become your voice.</p>
+            <p><strong>20 min:</strong> Repertoire — polish 2–3 standards to a level you could perform with others.</p>
+            <p><strong>20 min:</strong> Listening — transcribe by ear (not notation), a short phrase that you loved in something you listened to this week.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ESSENTIAL STANDARDS -->
+  <section class="beg-section">
+    <div class="container">
+      <h2 class="reveal">Essential Standards — Where to Begin</h2>
+      <p class="reveal">Learn these in roughly this order. Each introduces new harmonic or rhythmic challenges.</p>
+
+      <div class="standards-grid reveal">
+        <div class="standard-card">
+          <div class="std-title">Autumn Leaves</div>
+          <div class="std-level beginner">Beginner</div>
+          <p>Perfect first standard. Clear ii-V-Is in major and minor. Simple, beautiful melody.</p>
+        </div>
+        <div class="standard-card">
+          <div class="std-title">Blue Monk</div>
+          <div class="std-level beginner">Beginner</div>
+          <p>Thelonious Monk's blues. Introduces jazz blues harmony and Monk's angular phrasing.</p>
+        </div>
+        <div class="standard-card">
+          <div class="std-title">So What</div>
+          <div class="std-level beginner">Beginner Modal</div>
+          <p>Modal jazz — only two chords. Perfect for learning to improvise spaciously. D Dorian → E♭ Dorian.</p>
+        </div>
+        <div class="standard-card">
+          <div class="std-title">Fly Me to the Moon</div>
+          <div class="std-level beginner">Beginner</div>
+          <p>Diatonic ii-V-I progression through the circle of fourths. Singable melody. Many recordings.</p>
+        </div>
+        <div class="standard-card">
+          <div class="std-title">There Will Never Be Another You</div>
+          <div class="std-level intermediate">Intermediate</div>
+          <p>Classic AABA with interesting chromatic moments. Beboppers love it. Rich harmonic terrain.</p>
+        </div>
+        <div class="standard-card">
+          <div class="std-title">All The Things You Are</div>
+          <div class="std-level intermediate">Intermediate</div>
+          <p>Modulates through three key areas. The harmonic challenge you need once basics are solid.</p>
+        </div>
+        <div class="standard-card">
+          <div class="std-title">Stella by Starlight</div>
+          <div class="std-level intermediate">Intermediate</div>
+          <p>Sophisticated harmony, ambiguous tonality. Miles Davis's version is definitive.</p>
+        </div>
+        <div class="standard-card">
+          <div class="std-title">Giant Steps</div>
+          <div class="std-level intermediate">Advanced</div>
+          <p>Coltrane's harmonic masterpiece. Major thirds modulations at bebop tempos. The summit.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY ADVICE -->
+  <section class="beg-section">
+    <div class="container">
+      <h2 class="reveal">Specific Advice for Classical Pianists</h2>
+
+      <div class="two-col reveal">
+        <div>
+          <h3>What Your Classical Training Gives You</h3>
+          <p><strong>Harmonic intelligence.</strong> You understand chord function, voice-leading, tension and resolution. This is a massive advantage — you'll grasp jazz harmony concepts far faster than someone who doesn't read music.</p>
+          <p><strong>Technical facility.</strong> Your hands can already do hard things. Bebop scales, extended chord voicings, complex rhythms — you have the physical toolkit.</p>
+          <p><strong>Score-reading.</strong> Learning from Real Books (jazz fake books) will be easier for you than for many jazz musicians who learned purely by ear.</p>
+          <p><strong>Understanding of structure.</strong> You know what a phrase is, what a climax is, how music builds. This structural awareness is valuable in improvisation.</p>
+        </div>
+        <div>
+          <h3>What You'll Need to Unlearn</h3>
+          <p><strong>Playing from the page.</strong> Jazz is learned by ear and performed from memory. The Real Book is a guide, not a script. If you're reading at a jam session, you're not listening — and listening is everything.</p>
+          <p><strong>Fear of imprecision.</strong> Some of your best jazz moments will sound "wrong" by classical standards. Ornette Coleman said: "The only note you can play is the next one." You commit to what you just played and move forward.</p>
+          <p><strong>Thinking about theory while playing.</strong> Theory is for analysis and preparation. During improvisation, you need to hear what comes next, not think it. Practise theory until it becomes reflex, then let it go.</p>
+          <p><strong>Playing all the time.</strong> Classical pianists often fill every beat. Jazz players breathe — they leave space for the rhythm section, for the other soloists, for silence itself.</p>
+        </div>
+      </div>
+
+      <div class="tip-box reveal" style="margin-top:2rem;">
+        <div class="tip-label">The Most Important Thing</div>
+        <p>Sing. Sing the melodies, sing the scales, sing your solos before you play them. If you can sing what you're going to play — even roughly — your improvisation becomes melodic, human, and musical. The biggest difference between jazz and classical is that jazz is a <em>vocal</em> tradition passed through instruments. Every jazz note should feel like it was sung first.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="container">
+    <div class="footer-deco">♪ ♫ ♩ ♬</div>
+    <p>Jazz Almanac — A celebration of the world's greatest improvisational art form.</p>
+    <p class="mt-2"><a href="index.html">Home</a> · <a href="history.html">History</a> · <a href="styles-players.html">Styles</a> · <a href="theory.html">Theory</a> · <a href="beginners.html">Beginners</a> · <a href="neuroscience.html">Neuroscience</a></p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+  function toggleRoutine(header) {
+    const body = header.nextElementSibling;
+    body.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

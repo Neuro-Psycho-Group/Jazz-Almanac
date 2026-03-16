@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neuroscience of Jazz — Jazz Almanac</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/nav.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <style>
+    .neuro-section { padding: 4rem 0; }
+    .neuro-section:nth-child(odd) { background: var(--paper); }
+
+    /* Brain diagram */
+    .brain-container {
+      display: flex;
+      justify-content: center;
+      margin: 2.5rem 0;
+      position: relative;
+    }
+    .brain-svg-wrap {
+      position: relative;
+      width: min(500px, 90vw);
+    }
+    .brain-svg-wrap svg { width: 100%; height: auto; }
+
+    /* Brain region labels */
+    .brain-legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .brain-legend-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .brain-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+    .brain-legend-item .bli-title { font-weight: 600; font-size: 0.88rem; margin-bottom: 0.2rem; }
+    .brain-legend-item .bli-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+
+    /* EEG wave animation */
+    .eeg-container {
+      background: var(--ink);
+      border-radius: 4px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .eeg-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .eeg-waves {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .eeg-wave-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .eeg-wave-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: rgba(250,245,232,0.5);
+      width: 70px;
+      flex-shrink: 0;
+    }
+    .eeg-wave-visual {
+      flex: 1;
+      height: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .eeg-wave-visual svg { width: 200%; height: 100%; animation: scrollWave var(--wspd, 3s) linear infinite; }
+    @keyframes scrollWave {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* Finding cards */
+    .finding-card {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .finding-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 4px;
+      background: linear-gradient(90deg, #6B3A8B, #1A5C6B);
+    }
+    .finding-card .fc-icon { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
+    .finding-card h4 { margin-bottom: 0.5rem; }
+    .finding-card p { font-size: 0.9rem; line-height: 1.65; }
+    .finding-card .fc-study {
+      margin-top: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 0.75rem;
+    }
+
+    /* Flow state viz */
+    .flow-diagram {
+      background: var(--ink);
+      border-radius: 4px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+    .flow-diagram h4 { color: var(--gold-lt); font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1.5rem; }
+    .flow-axis {
+      position: relative;
+      height: 200px;
+      border-left: 2px solid rgba(250,245,232,0.2);
+      border-bottom: 2px solid rgba(250,245,232,0.2);
+      margin: 1rem 0 2rem 3rem;
+    }
+    .flow-axis::before { content: 'Skill Level →'; position: absolute; bottom: -1.5rem; right: 0; font-family: var(--font-mono); font-size: 0.65rem; color: rgba(250,245,232,0.4); letter-spacing: 0.08em; }
+    .flow-axis::after { content: 'Challenge ↑'; position: absolute; top: 0; left: -3rem; font-family: var(--font-mono); font-size: 0.65rem; color: rgba(250,245,232,0.4); letter-spacing: 0.08em; writing-mode: vertical-lr; }
+    .flow-zone {
+      position: absolute;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-align: center;
+      color: rgba(250,245,232,0.8);
+    }
+    .flow-zone.anxiety { background: rgba(139,58,42,0.4); top: 0; right: 0; width: 40%; height: 40%; }
+    .flow-zone.flow    { background: rgba(26,92,107,0.5); top: 25%; left: 30%; width: 45%; height: 45%; }
+    .flow-zone.boredom { background: rgba(122,102,69,0.3); bottom: 0; left: 0; width: 40%; height: 40%; }
+
+    /* Stat chips */
+    .stat-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .stat-chip {
+      background: var(--ink);
+      border: 1px solid rgba(184,131,42,0.3);
+      border-radius: 4px;
+      padding: 1rem 1.5rem;
+      text-align: center;
+      flex: 1;
+      min-width: 140px;
+    }
+    .stat-chip .sc-num {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--gold-lt);
+      line-height: 1;
+    }
+    .stat-chip .sc-label {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(250,245,232,0.5);
+      margin-top: 0.3rem;
+    }
+
+    /* Comparison table */
+    .brain-compare {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .brain-compare th {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      padding: 0.75rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .brain-compare td {
+      padding: 0.75rem;
+      border-bottom: 1px solid rgba(200,169,110,0.15);
+      font-size: 0.88rem;
+      vertical-align: top;
+    }
+    .brain-compare tr:hover td { background: rgba(184,131,42,0.04); }
+    .brain-compare td:first-child { font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-note">♪</span> Jazz Almanac</a>
+    <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="styles-players.html">Styles &amp; Players</a></li>
+      <li><a href="theory.html">Theory</a></li>
+      <li><a href="beginners.html">For Beginners</a></li>
+      <li><a href="neuroscience.html">Neuroscience</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+
+  <div class="section-hero">
+    <div class="deco-corner tl"></div>
+    <div class="deco-corner br"></div>
+    <div class="container">
+      <span class="subtitle">The Science</span>
+      <h1>The <em>Neuroscience</em> of Jazz</h1>
+      <p>What happens in the brain when a jazz musician improvises? The science is extraordinary — and suggests something fundamental about human creativity.</p>
+    </div>
+  </div>
+
+  <!-- KEY STATS -->
+  <section class="neuro-section">
+    <div class="container">
+      <h2 class="reveal">The Jazz Brain — At a Glance</h2>
+      <div class="stat-row reveal">
+        <div class="stat-chip">
+          <div class="sc-num">5x</div>
+          <div class="sc-label">More active DLPFC deactivation during improv vs. memorised music</div>
+        </div>
+        <div class="stat-chip">
+          <div class="sc-num">250ms</div>
+          <div class="sc-label">Typical musician response lag when synchronising — tighter than speech</div>
+        </div>
+        <div class="stat-chip">
+          <div class="sc-num">~10</div>
+          <div class="sc-label">Brain regions simultaneously engaged during jazz improvisation</div>
+        </div>
+        <div class="stat-chip">
+          <div class="sc-num">α+θ</div>
+          <div class="sc-label">Wave states (alpha & theta) elevated during creative improvisation</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BRAIN REGIONS -->
+  <section class="neuro-section">
+    <div class="container">
+      <h2 class="reveal">What Lights Up — Inside the Improvising Brain</h2>
+      <p class="reveal">Neuroscientist Charles Limb and colleagues used fMRI to scan jazz pianists improvising inside a scanner (they built a non-magnetic keyboard for exactly this purpose). The results were revelatory.</p>
+
+      <!-- SVG Brain Diagram -->
+      <div class="brain-container reveal">
+        <div class="brain-svg-wrap">
+          <svg viewBox="0 0 500 350" xmlns="http://www.w3.org/2000/svg" aria-label="Brain regions active during jazz improvisation">
+            <!-- Background -->
+            <rect width="500" height="350" fill="#1C1008" rx="8"/>
+
+            <!-- Brain outline (simplified lateral view) -->
+            <ellipse cx="240" cy="170" rx="180" ry="130" fill="#2A1A0A" stroke="#8B7355" stroke-width="2"/>
+
+            <!-- Frontal lobe highlight (DLPFC - deactivates) -->
+            <ellipse cx="130" cy="130" rx="70" ry="55" fill="rgba(139,58,42,0.4)" stroke="#8B3A2A" stroke-width="1.5"/>
+            <text x="130" y="118" text-anchor="middle" font-family="serif" font-size="11" fill="#f0a080">DLPFC</text>
+            <text x="130" y="133" text-anchor="middle" font-family="monospace" font-size="8" fill="rgba(240,160,128,0.7)">deactivates ↓</text>
+
+            <!-- Medial prefrontal (activates) -->
+            <ellipse cx="185" cy="105" rx="35" ry="25" fill="rgba(26,92,107,0.5)" stroke="#1A5C6B" stroke-width="1.5"/>
+            <text x="185" y="103" text-anchor="middle" font-family="serif" font-size="9" fill="#7fcfe0">mPFC</text>
+            <text x="185" y="114" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(127,207,224,0.7)">activates ↑</text>
+
+            <!-- Motor cortex -->
+            <ellipse cx="270" cy="95" rx="45" ry="28" fill="rgba(184,131,42,0.4)" stroke="#B8832A" stroke-width="1.5"/>
+            <text x="270" y="93" text-anchor="middle" font-family="serif" font-size="10" fill="#d4a84b">Motor Cortex</text>
+            <text x="270" y="106" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(212,168,75,0.7)">motor planning ↑↑</text>
+
+            <!-- Broca's area -->
+            <ellipse cx="140" cy="185" rx="40" ry="28" fill="rgba(90,122,58,0.45)" stroke="#5A7A3A" stroke-width="1.5"/>
+            <text x="140" y="183" text-anchor="middle" font-family="serif" font-size="9" fill="#a0c878">Broca's Area</text>
+            <text x="140" y="195" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(160,200,120,0.7)">syntax/grammar</text>
+
+            <!-- Auditory cortex -->
+            <ellipse cx="340" cy="175" rx="45" ry="28" fill="rgba(107,58,139,0.45)" stroke="#6B3A8B" stroke-width="1.5"/>
+            <text x="340" y="172" text-anchor="middle" font-family="serif" font-size="10" fill="#c07ae0">Auditory</text>
+            <text x="340" y="184" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(192,122,224,0.7)">Cortex ↑↑</text>
+
+            <!-- Cerebellum -->
+            <ellipse cx="370" cy="265" rx="60" ry="40" fill="rgba(184,131,42,0.25)" stroke="#B8832A" stroke-width="1.5" stroke-dasharray="4 2"/>
+            <text x="370" y="263" text-anchor="middle" font-family="serif" font-size="10" fill="#c8a050">Cerebellum</text>
+            <text x="370" y="275" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(200,160,80,0.6)">timing/rhythm</text>
+
+            <!-- Limbic (emotion) -->
+            <ellipse cx="240" cy="210" rx="38" ry="25" fill="rgba(139,58,42,0.3)" stroke="#8B3A2A" stroke-width="1.5"/>
+            <text x="240" y="208" text-anchor="middle" font-family="serif" font-size="9" fill="#e09070">Limbic System</text>
+            <text x="240" y="220" text-anchor="middle" font-family="monospace" font-size="7" fill="rgba(224,144,112,0.7)">emotion/memory</text>
+
+            <!-- Default mode network label -->
+            <text x="250" y="320" text-anchor="middle" font-family="monospace" font-size="9" fill="rgba(250,245,232,0.35)" letter-spacing="0.1em">JAZZ IMPROVISATION — ACTIVE REGIONS</text>
+
+            <!-- Pulse animation dots -->
+            <circle cx="130" cy="130" r="4" fill="#8B3A2A" opacity="0.8">
+              <animate attributeName="r" values="4;8;4" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="185" cy="105" r="4" fill="#1A5C6B" opacity="0.8">
+              <animate attributeName="r" values="4;8;4" dur="1.5s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="270" cy="95" r="4" fill="#B8832A" opacity="0.8">
+              <animate attributeName="r" values="4;8;4" dur="1.8s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1.8s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="340" cy="175" r="4" fill="#6B3A8B" opacity="0.8">
+              <animate attributeName="r" values="4;8;4" dur="2.2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2.2s" repeatCount="indefinite"/>
+            </circle>
+          </svg>
+        </div>
+      </div>
+
+      <div class="brain-legend reveal">
+        <div class="brain-legend-item">
+          <div class="brain-dot" style="background:#8B3A2A;"></div>
+          <div>
+            <div class="bli-title">DLPFC — Deactivates</div>
+            <div class="bli-desc">The dorsolateral prefrontal cortex — seat of self-monitoring, self-censorship, and deliberate control — goes quiet during improvisation. The inner critic switches off.</div>
+          </div>
+        </div>
+        <div class="brain-legend-item">
+          <div class="brain-dot" style="background:#1A5C6B;"></div>
+          <div>
+            <div class="bli-title">mPFC — Activates</div>
+            <div class="bli-desc">The medial prefrontal cortex — associated with self-expression and autobiographical narrative — becomes highly active. The musician expresses <em>themselves</em>.</div>
+          </div>
+        </div>
+        <div class="brain-legend-item">
+          <div class="brain-dot" style="background:#B8832A;"></div>
+          <div>
+            <div class="bli-title">Motor Cortex — Hyper-active</div>
+            <div class="bli-desc">Vast portions of motor cortex coordinate the extraordinary precision and speed of musical motor execution — especially for fast bebop tempos.</div>
+          </div>
+        </div>
+        <div class="brain-legend-item">
+          <div class="brain-dot" style="background:#5A7A3A;"></div>
+          <div>
+            <div class="bli-title">Broca's Area — Language Network</div>
+            <div class="bli-desc">Broca's area (typically associated with speech production) activates during musical improvisation — suggesting jazz is processed as a language by the brain.</div>
+          </div>
+        </div>
+        <div class="brain-legend-item">
+          <div class="brain-dot" style="background:#6B3A8B;"></div>
+          <div>
+            <div class="bli-title">Auditory Cortex — Real-time Monitoring</div>
+            <div class="bli-desc">The improviser constantly monitors their own output and the rest of the band. The auditory cortex is working overtime — the brain hears its own music as it creates it.</div>
+          </div>
+        </div>
+        <div class="brain-legend-item">
+          <div class="brain-dot" style="background:#8B3A2A; opacity:0.6;"></div>
+          <div>
+            <div class="bli-title">Limbic System — Emotional Gating</div>
+            <div class="bli-desc">The limbic system connects musical decisions to emotional memory — why a jazz musician's phrasing reflects personal experience, not just technical choices.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EEG WAVES -->
+  <section class="neuro-section">
+    <div class="container">
+      <h2 class="reveal">Brain Waves During Improvisation</h2>
+      <p class="reveal">EEG recordings of jazz musicians during improvisation show distinctive brainwave signatures compared to playing memorised music or resting.</p>
+
+      <div class="eeg-container reveal">
+        <div class="eeg-label">EEG Waveforms — Simulated (illustrative)</div>
+        <div class="eeg-waves">
+          <div class="eeg-wave-row">
+            <div class="eeg-wave-label">Beta (13–30Hz)<br/>Normal thought</div>
+            <div class="eeg-wave-visual">
+              <svg viewBox="0 0 400 32" preserveAspectRatio="none">
+                <polyline points="0,16 20,4 40,28 60,6 80,26 100,8 120,24 140,10 160,22 180,12 200,16 220,4 240,28 260,6 280,26 300,8 320,24 340,10 360,22 380,12 400,16 420,4 440,28 460,6 480,26 500,8 520,24 540,10 560,22 580,12 600,16 620,4 640,28 660,6 680,26 700,8 720,24 740,10 760,22 780,12 800,16" fill="none" stroke="rgba(184,131,42,0.6)" stroke-width="1.5"/>
+              </svg>
+            </div>
+          </div>
+          <div class="eeg-wave-row">
+            <div class="eeg-wave-label">Alpha (8–13Hz)<br/>↑ during improv</div>
+            <div class="eeg-wave-visual" style="--wspd:4s">
+              <svg viewBox="0 0 400 32" preserveAspectRatio="none">
+                <polyline points="0,16 30,2 60,30 90,2 120,30 150,2 180,30 210,2 240,30 270,2 300,30 330,2 360,30 390,2 420,30 450,2 480,30 510,2 540,30 570,2 600,30 630,2 660,30 690,2 720,30 750,2 780,30 810,16" fill="none" stroke="rgba(26,92,107,0.8)" stroke-width="2"/>
+              </svg>
+            </div>
+          </div>
+          <div class="eeg-wave-row">
+            <div class="eeg-wave-label">Theta (4–8Hz)<br/>↑ creativity</div>
+            <div class="eeg-wave-visual" style="--wspd:6s">
+              <svg viewBox="0 0 400 32" preserveAspectRatio="none">
+                <polyline points="0,16 50,1 100,31 150,1 200,31 250,1 300,31 350,1 400,31 450,1 500,31 550,1 600,31 650,1 700,31 750,1 800,31 810,16" fill="none" stroke="rgba(107,58,139,0.8)" stroke-width="2.5"/>
+              </svg>
+            </div>
+          </div>
+          <div class="eeg-wave-row">
+            <div class="eeg-wave-label">Delta (1–4Hz)<br/>Deep states</div>
+            <div class="eeg-wave-visual" style="--wspd:10s">
+              <svg viewBox="0 0 400 32" preserveAspectRatio="none">
+                <polyline points="0,16 80,0 160,32 240,0 320,32 400,0 480,32 560,0 640,32 720,0 800,16" fill="none" stroke="rgba(139,58,42,0.5)" stroke-width="2"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col reveal">
+        <div>
+          <p><strong>Alpha waves</strong> (8–13 Hz) are associated with relaxed, inwardly-focused attention — they increase during improvisation compared to playing memorised music. This reflects the musician's relaxed-but-focused state: alert but not anxious.</p>
+          <p><strong>Theta waves</strong> (4–8 Hz) are linked to creativity, intuition, and access to unconscious material. They increase significantly during improv, particularly in the frontal lobe — the brain is drawing on deep pattern-matching and intuitive knowledge.</p>
+        </div>
+        <div>
+          <p>Crucially, <strong>beta waves</strong> (13–30 Hz) — associated with active analytical thinking and self-monitoring — decrease in the DLPFC (self-critic region) during improvisation. The brain literally reduces its own self-editing processes to allow creative flow.</p>
+          <div class="info-box">
+            <div class="info-label">The Flow State</div>
+            <p>This pattern of heightened alpha/theta with reduced beta in self-monitoring regions matches the neurological signature of Csikszentmihalyi's famous "flow state" — optimal human performance with effortless concentration.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JAZZ AS LANGUAGE -->
+  <section class="neuro-section">
+    <div class="container">
+      <h2 class="reveal">Jazz as Language — The Conversation Hypothesis</h2>
+
+      <div class="two-col reveal">
+        <div>
+          <p>Perhaps the most fascinating neuroscience finding: <strong>jazz improvisation activates the same brain regions as language</strong>. Specifically, areas in the left temporal lobe associated with syntactic processing — structuring sentences, anticipating grammatical patterns — light up when jazz musicians improvise.</p>
+          <p>Charles Limb's lab at UCSF recorded jazz musicians improvising with each other and found that when one musician was "speaking" (soloing), the language production areas activated; when "listening" to the other musician, language comprehension areas activated. Jazz really is a conversation — neurologically, not just metaphorically.</p>
+          <p><strong>Broca's area</strong>, classically associated with speech production, activates during improvisation. This suggests the brain treats musical improvisation as a form of language — with grammar (harmonic structure), syntax (phrase shapes), vocabulary (jazz licks), and pragmatics (call-and-response, deference, interruption).</p>
+        </div>
+        <div>
+          <div class="chord-box">
+            <span class="chord-label">Jazz Conversation vs. Spoken Conversation</span>
+            <table style="width:100%;font-size:0.82rem;color:rgba(250,245,232,0.8);">
+              <tr style="border-bottom:1px solid rgba(184,131,42,0.2);">
+                <td style="padding:0.4rem 0.5rem;color:var(--gold-lt);">Language</td>
+                <td style="padding:0.4rem 0.5rem;color:var(--gold-lt);">Jazz Equivalent</td>
+              </tr>
+              <tr><td style="padding:0.4rem 0.5rem;">Words</td><td style="padding:0.4rem 0.5rem;">Licks / Phrases</td></tr>
+              <tr><td style="padding:0.4rem 0.5rem;">Grammar</td><td style="padding:0.4rem 0.5rem;">Harmonic rules</td></tr>
+              <tr><td style="padding:0.4rem 0.5rem;">Sentences</td><td style="padding:0.4rem 0.5rem;">Musical phrases</td></tr>
+              <tr><td style="padding:0.4rem 0.5rem;">Tone of voice</td><td style="padding:0.4rem 0.5rem;">Dynamics / timbre</td></tr>
+              <tr><td style="padding:0.4rem 0.5rem;">Interrupting</td><td style="padding:0.4rem 0.5rem;">Playing over / cross-rhythm</td></tr>
+              <tr><td style="padding:0.4rem 0.5rem;">Silence</td><td style="padding:0.4rem 0.5rem;">Space / rest</td></tr>
+              <tr><td style="padding:0.4rem 0.5rem;">Dialect / accent</td><td style="padding:0.4rem 0.5rem;">Personal style / sound</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY FINDINGS -->
+  <section class="neuro-section">
+    <div class="container">
+      <h2 class="reveal">Key Research Findings</h2>
+
+      <div class="card-grid reveal">
+        <div class="finding-card">
+          <span class="fc-icon">🧠</span>
+          <h4>The Self-Expression Switch</h4>
+          <p>During improvisation, the DLPFC (self-censorship) deactivates and mPFC (self-expression) activates — a unique neural "switch" not seen during memorised music performance. This is the neurological signature of abandoning the inner critic.</p>
+          <div class="fc-study">Limb &amp; Braun, PLOS ONE (2008) — fMRI study, jazz pianists</div>
+        </div>
+
+        <div class="finding-card">
+          <span class="fc-icon">🎵</span>
+          <h4>Musical Grammar Lives in the Language Brain</h4>
+          <p>When jazz musicians improvise together, Broca's area activates during the "speaking" phase and Wernicke's area activates during "listening." Jazz truly is processed as a language, not merely as sound patterns.</p>
+          <div class="fc-study">Limb et al., PLOS ONE (2012) — duo improvisation study</div>
+        </div>
+
+        <div class="finding-card">
+          <span class="fc-icon">⚡</span>
+          <h4>Extraordinary Motor Precision</h4>
+          <p>Jazz musicians show unusual synchrony between motor planning and auditory feedback systems. At 300 BPM, each note lasts 50ms — yet jazz musicians can adjust mid-phrase based on what they hear. The feedback loop is astonishingly tight.</p>
+          <div class="fc-study">Zatorre &amp; Salimpoor, Nature Reviews Neuroscience (2013)</div>
+        </div>
+
+        <div class="finding-card">
+          <span class="fc-icon">🔗</span>
+          <h4>Enhanced White Matter Connectivity</h4>
+          <p>Professional jazz musicians show significantly increased white matter (axonal connections) in areas linking the auditory cortex, motor planning areas, and prefrontal cortex. Years of improvisation rewires the brain structurally.</p>
+          <div class="fc-study">Bengtsson et al., NeuroImage (2005) — diffusion tensor imaging</div>
+        </div>
+
+        <div class="finding-card">
+          <span class="fc-icon">🎯</span>
+          <h4>The Mirror Neuron System</h4>
+          <p>When jazz musicians listen to each other play, their motor cortex activates — the brain "rehearses" playing the music it hears. Experienced improvisers show stronger mirror neuron activation, suggesting listening is an active, embodied process.</p>
+          <div class="fc-study">Overy &amp; Molnar-Szakacs, Music Perception (2009)</div>
+        </div>
+
+        <div class="finding-card">
+          <span class="fc-icon">💫</span>
+          <h4>Emotional Resonance &amp; Dopamine</h4>
+          <p>Jazz musicians and listeners both show dopamine release at moments of harmonic tension and resolution. The ii-V-I progression triggers predictive pleasure — the brain anticipates the resolution and rewards itself when it arrives (or surprises itself when it doesn't).</p>
+          <div class="fc-study">Salimpoor et al., Nature Neuroscience (2011)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLOW STATE -->
+  <section class="neuro-section">
+    <div class="container">
+      <h2 class="reveal">Flow State — When the Music Plays Itself</h2>
+
+      <div class="two-col reveal">
+        <div>
+          <p>Jazz musicians frequently report experiences that match the psychological description of <em>flow</em> — total absorption, loss of self-consciousness, effortless action, distorted time perception. Csikszentmihalyi's flow model requires the right balance of challenge and skill. Jazz improvisation is specifically designed to produce this state.</p>
+          <p>The structure of jazz — a familiar harmonic framework but infinite melodic possibility — sits precisely at the intersection of "sufficiently challenging" and "sufficiently controlled" that flow tends to emerge. The musical form provides just enough constraint; the improvisation provides just enough freedom.</p>
+
+          <div class="flow-diagram">
+            <h4>The Flow Channel</h4>
+            <div class="flow-axis">
+              <div class="flow-zone anxiety">ANXIETY<br/>(too hard)</div>
+              <div class="flow-zone flow">✦ FLOW<br/>Jazz improv<br/>lives here</div>
+              <div class="flow-zone boredom">BOREDOM<br/>(too easy)</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p>In flow, the distinction between performer and performance dissolves — musicians report that "the music plays itself." Neurologically, this corresponds to the deactivation of the self-monitoring DLPFC and reduced activity in areas associated with rumination and meta-cognition.</p>
+          <p>Notably, expert jazz musicians enter flow more easily than novices — not because their playing requires less effort, but because their technique has been automatised to such a degree that the conscious mind is freed from mechanical concerns. The technical becomes reflex; the creative becomes the only thing requiring attention.</p>
+          <div class="tip-box">
+            <div class="tip-label">Practical Implication</div>
+            <p>This is why jazz requires thousands of hours of technical practice — not so you can think about the technique during performance, but so you can forget it entirely. The goal of practice is to make technique unconscious, creating the conditions for flow.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section class="neuro-section">
+    <div class="container">
+      <h2 class="reveal">Classical vs. Jazz Musicians — Brain Differences</h2>
+      <p class="reveal">Decades of musical training sculpt the brain differently depending on the type of music. Classical and jazz musicians show measurably different neural architectures.</p>
+
+      <div class="reveal" style="overflow-x:auto;">
+        <table class="brain-compare">
+          <thead>
+            <tr>
+              <th>Brain Region / Function</th>
+              <th>Classical Musicians</th>
+              <th>Jazz Musicians</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Auditory Cortex</td>
+              <td>Enlarged, high pitch discrimination, absolute pitch more common</td>
+              <td>Enlarged, but particularly strong timbre discrimination and rhythmic pattern recognition</td>
+            </tr>
+            <tr>
+              <td>Motor-Auditory Coupling</td>
+              <td>Strong for learned sequences (motor programs stored)</td>
+              <td>Strong real-time coupling — auditory feedback immediately informs motor output</td>
+            </tr>
+            <tr>
+              <td>DLPFC (Self-monitoring)</td>
+              <td>Often more active during performance — monitoring accuracy</td>
+              <td>Trained to deactivate during improvisation — reducing self-censorship</td>
+            </tr>
+            <tr>
+              <td>Working Memory</td>
+              <td>Strong for sequential melodic and rhythmic patterns</td>
+              <td>Strong for harmonic patterns, chord sequences, and real-time harmonic navigation</td>
+            </tr>
+            <tr>
+              <td>Social/Interpersonal Areas</td>
+              <td>Less specifically trained for simultaneous social music-making</td>
+              <td>Enhanced — ensemble improvisation requires constant social prediction and response</td>
+            </tr>
+            <tr>
+              <td>Default Mode Network</td>
+              <td>Suppressed during performance (focus on task)</td>
+              <td>Partially active during improvisation — self-referential, autobiographical</td>
+            </tr>
+            <tr>
+              <td>Creative Ideation</td>
+              <td>High within interpretive boundaries; less so for novel generation</td>
+              <td>Optimised for rapid novel melodic generation under time pressure</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box reveal mt-4">
+        <div class="info-label">The Crossover Advantage</div>
+        <p>Research suggests that musicians who train in both classical and jazz performance develop the most comprehensive neural architectures — combining the structural/technical precision of classical training with the improvisational, social, and real-time creative processing of jazz. This is one reason why studying jazz theory is valuable even for dedicated classical musicians: it literally develops different parts of the musical brain.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL BRAIN -->
+  <section class="neuro-section">
+    <div class="container">
+      <h2 class="reveal">Jazz as Social Neuroscience</h2>
+      <p class="reveal">Jazz improvisation may be the most cognitively demanding social activity humans regularly perform.</p>
+
+      <div class="two-col reveal">
+        <div>
+          <p>When jazz musicians improvise together, each musician simultaneously:</p>
+          <p>• <strong>Generates novel melodic material</strong> (creative production)</p>
+          <p>• <strong>Navigates harmonic changes</strong> (working memory, pattern recognition)</p>
+          <p>• <strong>Listens to every other musician</strong> (divided attention)</p>
+          <p>• <strong>Predicts what others will play</strong> (theory of mind, social cognition)</p>
+          <p>• <strong>Responds to what others play</strong> (real-time decision making)</p>
+          <p>• <strong>Maintains the groove</strong> (motor timing, rhythmic entrainment)</p>
+          <p>• <strong>Communicates musical emotion</strong> (limbic/emotional processing)</p>
+          <p>This makes jazz one of the most complex neurological tasks documented — not because any single component is unique, but because of their <em>simultaneous integration</em>.</p>
+        </div>
+        <div>
+          <div class="card">
+            <h4>Neural Synchrony Between Musicians</h4>
+            <p>Groundbreaking EEG studies (Ulman Lindenberger, Max Planck Institute) recorded pairs of guitarists playing together and found measurable neural synchrony — their brainwaves literally synchronised, particularly in theta and alpha bands. This neural coupling was stronger when the music was "in sync" and reflected the same musical communication happening at the instrument level.</p>
+            <p>Jazz musicians who have played together for years show stronger neural synchrony — their brains have learned to predict each other. This is the neurological basis of what musicians call "playing as one."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="container">
+    <div class="footer-deco">♪ ♫ ♩ ♬</div>
+    <p>Jazz Almanac — A celebration of the world's greatest improvisational art form.</p>
+    <p class="mt-2"><a href="index.html">Home</a> · <a href="history.html">History</a> · <a href="styles-players.html">Styles</a> · <a href="theory.html">Theory</a> · <a href="beginners.html">Beginners</a> · <a href="neuroscience.html">Neuroscience</a></p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

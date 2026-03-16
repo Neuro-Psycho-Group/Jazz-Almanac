@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Music Theory — Jazz Almanac</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/nav.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <style>
+    .theory-section { padding: 4rem 0; }
+    .theory-section:nth-child(odd) { background: var(--paper); }
+
+    /* Chord diagram */
+    .chord-diagram {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      font-family: var(--font-mono);
+    }
+    .chord-name-display {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.25rem;
+    }
+    .chord-tones {
+      display: flex;
+      gap: 0.3rem;
+    }
+    .tone-pill {
+      background: var(--ink);
+      color: var(--gold-lt);
+      font-size: 0.75rem;
+      padding: 0.2em 0.5em;
+      border-radius: 1px;
+      font-family: var(--font-mono);
+    }
+    .tone-pill.root { background: var(--gold-dk); color: var(--cream); }
+    .tone-pill.tension { background: var(--teal); }
+
+    /* ii-V-I big visual */
+    .progression-visual {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding: 2rem;
+      background: var(--ink);
+      border-radius: 4px;
+      margin: 2rem 0;
+    }
+    .prog-chord {
+      text-align: center;
+      flex: 1;
+      min-width: 100px;
+    }
+    .prog-numeral {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--gold-lt);
+      line-height: 1;
+    }
+    .prog-function {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(250,245,232,0.5);
+      margin-top: 0.3rem;
+    }
+    .prog-example {
+      font-size: 1.1rem;
+      color: var(--cream);
+      font-family: var(--font-display);
+      font-style: italic;
+      margin-top: 0.5rem;
+    }
+    .prog-arrow {
+      font-size: 2rem;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+    .prog-feel {
+      font-size: 0.75rem;
+      color: rgba(250,245,232,0.4);
+      margin-top: 0.25rem;
+    }
+
+    /* Scale visualiser */
+    .scale-bar {
+      display: flex;
+      gap: 0.2rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    .scale-note {
+      padding: 0.5rem 0.75rem;
+      border-radius: 1px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: center;
+      min-width: 38px;
+    }
+    .scale-note.whole { background: var(--gold); color: var(--ink); }
+    .scale-note.half  { background: var(--ink); color: var(--gold-lt); border: 1px solid var(--gold); }
+    .scale-note.root  { background: var(--rust); color: var(--cream); }
+    .scale-note.blue  { background: var(--teal); color: var(--cream); }
+
+    /* Tension circle */
+    .circle-of-fifths {
+      width: min(340px, 90vw);
+      height: min(340px, 90vw);
+      margin: 2rem auto;
+      position: relative;
+    }
+    .cof-svg text { font-family: var(--font-display); }
+
+    /* Tabs same style as styles page */
+    .tab-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+    .tab-btn {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      margin-bottom: -2px;
+    }
+    .tab-btn:hover { color: var(--gold); }
+    .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Tritone sub visual */
+    .tritone-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      padding: 2rem;
+      background: var(--bg-dark);
+      border-radius: 4px;
+      margin: 1.5rem 0;
+      border: 1px solid var(--border);
+    }
+    .tv-chord {
+      text-align: center;
+    }
+    .tv-chord .tv-name { font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; }
+    .tv-chord .tv-label { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
+    .tv-link { font-size: 2.5rem; color: var(--gold); }
+
+    /* Modes table */
+    .modes-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .modes-table th {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 2px solid var(--border);
+    }
+    .modes-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid rgba(200,169,110,0.2);
+      vertical-align: top;
+    }
+    .modes-table tr:hover td { background: rgba(184,131,42,0.05); }
+    .mode-name { font-family: var(--font-display); font-weight: 700; }
+    .mode-feel { color: var(--muted); font-style: italic; font-size: 0.82rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-note">♪</span> Jazz Almanac</a>
+    <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="styles-players.html">Styles &amp; Players</a></li>
+      <li><a href="theory.html">Theory</a></li>
+      <li><a href="beginners.html">For Beginners</a></li>
+      <li><a href="neuroscience.html">Neuroscience</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+
+  <div class="section-hero">
+    <div class="deco-corner tl"></div>
+    <div class="deco-corner br"></div>
+    <div class="container">
+      <span class="subtitle">The Language</span>
+      <h1>Music Theory <em>for Jazz</em></h1>
+      <p>Jazz has one of music's richest harmonic languages. Here it is decoded — from the basics to the advanced.</p>
+    </div>
+  </div>
+
+  <!-- ii-V-I -->
+  <section class="theory-section">
+    <div class="container">
+      <h2 class="reveal">The ii–V–I: Jazz's Harmonic DNA</h2>
+      <p class="reveal">If there is one progression to know in jazz, it is the <strong>ii–V–I</strong>. It appears in virtually every standard, in every key, in every style. Understanding it is understanding jazz harmony.</p>
+
+      <div class="progression-visual reveal">
+        <div class="prog-chord">
+          <div class="prog-numeral">ii</div>
+          <div class="prog-function">Subdominant / Tension</div>
+          <div class="prog-example">Dm7</div>
+          <div class="prog-feel">creates pull</div>
+        </div>
+        <div class="prog-arrow">→</div>
+        <div class="prog-chord">
+          <div class="prog-numeral">V</div>
+          <div class="prog-function">Dominant / Maximum Tension</div>
+          <div class="prog-example">G7</div>
+          <div class="prog-feel">desperately needs resolution</div>
+        </div>
+        <div class="prog-arrow">→</div>
+        <div class="prog-chord">
+          <div class="prog-numeral">I</div>
+          <div class="prog-function">Tonic / Resolution</div>
+          <div class="prog-example">Cmaj7</div>
+          <div class="prog-feel">home</div>
+        </div>
+      </div>
+
+      <div class="two-col reveal">
+        <div>
+          <p>In the key of C major, the ii chord is <strong>Dm7</strong>, the V chord is <strong>G7</strong>, and the I chord is <strong>Cmaj7</strong>. The progression creates tension (ii) → maximum tension (V) → resolution (I). This mirrors the most fundamental harmonic logic in Western music — but jazz layers extensions, alterations, and substitutions on top.</p>
+          <p>In minor keys: <strong>iim7♭5 – V7alt – Im(maj7)</strong> (e.g., Dm7♭5 → G7♭9♭13 → Cm(maj7)). The altered dominant (V7alt) — with a flattened 9th, sharpened 9th, ♭13 — creates extra chromatic tension that resolves dramatically.</p>
+        </div>
+        <div>
+          <div class="chord-box">
+            <span class="chord-label">Common Jazz Chord Extensions on Dominant</span>
+            <p style="color:rgba(250,245,232,0.7);font-size:0.85rem;margin-bottom:0.75rem;">G7 can become any of these:</p>
+            <div class="chord-notation">
+              <span class="note">G9</span>
+              <span class="note">G13</span>
+              <span class="note">G7♭9</span>
+              <span class="note">G7♯9</span>
+              <span class="note">G7♭13</span>
+              <span class="note">G7alt</span>
+              <span class="note">G7sus4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHORD EXTENSIONS -->
+  <section class="theory-section">
+    <div class="container">
+      <h2 class="reveal">Chord Extensions: Building Upward</h2>
+      <p class="reveal">Jazz chords are "tall" — they stack thirds above the seventh chord, adding the 9th, 11th and 13th. Each extension adds colour and character.</p>
+
+      <div class="card-grid reveal">
+        <div class="card">
+          <div class="chord-name-display">Cmaj7</div>
+          <div class="chord-tones">
+            <span class="tone-pill root">C</span>
+            <span class="tone-pill">E</span>
+            <span class="tone-pill">G</span>
+            <span class="tone-pill">B</span>
+          </div>
+          <p class="mt-2" style="font-size:0.88rem;">The foundational jazz chord. Rich, settled, slightly dreamlike. 1-3-5-7.</p>
+        </div>
+        <div class="card">
+          <div class="chord-name-display">Cmaj9</div>
+          <div class="chord-tones">
+            <span class="tone-pill root">C</span>
+            <span class="tone-pill">E</span>
+            <span class="tone-pill">G</span>
+            <span class="tone-pill">B</span>
+            <span class="tone-pill tension">D</span>
+          </div>
+          <p class="mt-2" style="font-size:0.88rem;">Add the 9th (D) — lush, open, luminous. Very common in standards.</p>
+        </div>
+        <div class="card">
+          <div class="chord-name-display">Dm11</div>
+          <div class="chord-tones">
+            <span class="tone-pill root">D</span>
+            <span class="tone-pill">F</span>
+            <span class="tone-pill">A</span>
+            <span class="tone-pill">C</span>
+            <span class="tone-pill tension">E</span>
+            <span class="tone-pill tension">G</span>
+          </div>
+          <p class="mt-2" style="font-size:0.88rem;">Stacked to the 11th — creates a floating, suspended quality. Modal jazz staple.</p>
+        </div>
+        <div class="card">
+          <div class="chord-name-display">G13</div>
+          <div class="chord-tones">
+            <span class="tone-pill root">G</span>
+            <span class="tone-pill">B</span>
+            <span class="tone-pill">D</span>
+            <span class="tone-pill">F</span>
+            <span class="tone-pill tension">E</span>
+          </div>
+          <p class="mt-2" style="font-size:0.88rem;">Full dominant with 13th — swinging, assertive, implies full V chord function. Often voiced without the 5th.</p>
+        </div>
+        <div class="card">
+          <div class="chord-name-display">Cm(maj7)</div>
+          <div class="chord-tones">
+            <span class="tone-pill root">C</span>
+            <span class="tone-pill">E♭</span>
+            <span class="tone-pill">G</span>
+            <span class="tone-pill tension">B</span>
+          </div>
+          <p class="mt-2" style="font-size:0.88rem;">Minor chord with major 7th. Mysterious, bittersweet, cinematic. Climactic moment of a minor ii-V-I resolution.</p>
+        </div>
+        <div class="card">
+          <div class="chord-name-display">G7♯9</div>
+          <div class="chord-tones">
+            <span class="tone-pill root">G</span>
+            <span class="tone-pill">B</span>
+            <span class="tone-pill">D</span>
+            <span class="tone-pill">F</span>
+            <span class="tone-pill tension">A♯</span>
+          </div>
+          <p class="mt-2" style="font-size:0.88rem;">The "Hendrix chord" — hugely expressive. The ♯9 (A♯/B♭) clashes against the major 3rd (B), creating raw tension. Bebop staple.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCALES & MODES -->
+  <section class="theory-section">
+    <div class="container">
+      <h2 class="reveal">Scales, Modes &amp; The Jazz Palette</h2>
+      <p class="reveal">Knowing which scale to play over which chord is the improviser's core skill. Jazz uses all of the modes plus several special scales unique to the idiom.</p>
+
+      <div data-tabs class="reveal">
+        <div class="tab-bar">
+          <button class="tab-btn" data-tab-btn="modes">Church Modes</button>
+          <button class="tab-btn" data-tab-btn="bebopscale">Bebop Scales</button>
+          <button class="tab-btn" data-tab-btn="diminished">Diminished</button>
+          <button class="tab-btn" data-tab-btn="wholetone">Whole Tone</button>
+          <button class="tab-btn" data-tab-btn="altered">Altered Scale</button>
+        </div>
+
+        <div data-tab-panel="modes" class="tab-panel">
+          <p>The seven modes of the major scale each have a distinct character. Jazz uses them extensively, particularly Dorian (for minor chords), Mixolydian (for dominant chords), and Lydian (for major chords).</p>
+          <table class="modes-table">
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Formula</th>
+                <th>Use Over</th>
+                <th>Character</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="mode-name">Ionian</div><div class="mode-feel">C D E F G A B</div></td>
+                <td>W W H W W W H</td>
+                <td>Imaj7</td>
+                <td>Bright, complete, resolved</td>
+              </tr>
+              <tr>
+                <td><div class="mode-name">Dorian</div><div class="mode-feel">D E F G A B C</div></td>
+                <td>W H W W W H W</td>
+                <td>iim7, minor vamps</td>
+                <td>Minor but open, slightly bluesy — the jazz minor</td>
+              </tr>
+              <tr>
+                <td><div class="mode-name">Phrygian</div><div class="mode-feel">E F G A B C D</div></td>
+                <td>H W W W H W W</td>
+                <td>iiim7 (rare)</td>
+                <td>Dark, Spanish, flamenco quality</td>
+              </tr>
+              <tr>
+                <td><div class="mode-name">Lydian</div><div class="mode-feel">F G A B C D E</div></td>
+                <td>W W W H W W H</td>
+                <td>IVmaj7, Imaj7 colour</td>
+                <td>Dreamy, floating, celestial (♯4 is the magic note)</td>
+              </tr>
+              <tr>
+                <td><div class="mode-name">Mixolydian</div><div class="mode-feel">G A B C D E F</div></td>
+                <td>W W H W W H W</td>
+                <td>V7, dominant chords</td>
+                <td>Blues-adjacent, swinging, rock-friendly</td>
+              </tr>
+              <tr>
+                <td><div class="mode-name">Aeolian</div><div class="mode-feel">A B C D E F G</div></td>
+                <td>W H W W H W W</td>
+                <td>Natural minor</td>
+                <td>Melancholic, classical minor</td>
+              </tr>
+              <tr>
+                <td><div class="mode-name">Locrian</div><div class="mode-feel">B C D E F G A</div></td>
+                <td>H W W H W W W</td>
+                <td>iim7♭5 (half-diminished)</td>
+                <td>Unstable, unresolved, tense</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div data-tab-panel="bebopscale" class="tab-panel">
+          <p>Bebop scales add a chromatic passing tone to standard scales — this keeps chord tones landing on the beat, which produces the characteristic bebop "flow" when playing eighth notes.</p>
+          <div class="chord-box">
+            <span class="chord-label">Bebop Dominant Scale (G Mixolydian + ♭7)</span>
+            <div class="scale-bar">
+              <span class="scale-note root">G</span>
+              <span class="scale-note whole">A</span>
+              <span class="scale-note whole">B</span>
+              <span class="scale-note whole">C</span>
+              <span class="scale-note whole">D</span>
+              <span class="scale-note whole">E</span>
+              <span class="scale-note blue">F</span>
+              <span class="scale-note half">F♯</span>
+              <span class="scale-note root">G</span>
+            </div>
+            <p style="font-size:0.82rem;color:rgba(250,245,232,0.6);">The added passing tone (F♯) makes 8 notes. Playing eighth notes from any chord tone lands chord tones on the beat.</p>
+          </div>
+          <p>Charlie Parker used bebop scales instinctively. By building phrases that aligned with this 8-note scale, chord tones naturally fell on the "strong" beats (1, 2, 3, 4) and passing tones on the "and" beats — creating the bebop rhythmic feel.</p>
+        </div>
+
+        <div data-tab-panel="diminished" class="tab-panel">
+          <p>The <strong>diminished scale</strong> (also called octatonic) alternates whole and half steps, producing a symmetrical 8-note scale. Because of this symmetry, it repeats every minor third — so one scale works for four different chords.</p>
+          <div class="chord-box">
+            <span class="chord-label">Half-Whole Diminished (used over dominant 7♭9)</span>
+            <div class="scale-bar">
+              <span class="scale-note root">C</span>
+              <span class="scale-note half">D♭</span>
+              <span class="scale-note whole">E♭</span>
+              <span class="scale-note half">E</span>
+              <span class="scale-note whole">F♯</span>
+              <span class="scale-note half">G</span>
+              <span class="scale-note whole">A</span>
+              <span class="scale-note half">B♭</span>
+              <span class="scale-note root">C</span>
+            </div>
+          </div>
+          <p>This scale contains the ♭9, ♯9, ♯11, and 13 — all the "altered" tensions naturally. It creates a distinctive, slightly dissonant tension over a dominant chord, perfectly set up to resolve to the I chord.</p>
+        </div>
+
+        <div data-tab-panel="wholetone" class="tab-panel">
+          <p>The whole tone scale divides the octave into six equal whole steps. There are only two distinct whole tone scales — every note is exactly the same distance from the next. The result is a floating, directionless, almost impressionist quality.</p>
+          <div class="chord-box">
+            <span class="chord-label">Whole Tone Scale — C</span>
+            <div class="scale-bar">
+              <span class="scale-note root">C</span>
+              <span class="scale-note whole">D</span>
+              <span class="scale-note whole">E</span>
+              <span class="scale-note whole">F♯</span>
+              <span class="scale-note whole">G♯</span>
+              <span class="scale-note whole">A♯</span>
+              <span class="scale-note root">C</span>
+            </div>
+          </div>
+          <p>Debussy used it extensively (which is why it sounds French and impressionistic). In jazz, it's used over augmented chords and occasionally over V7♯5 chords. Thelonious Monk used it strategically to create his trademark "off" moments.</p>
+        </div>
+
+        <div data-tab-panel="altered" class="tab-panel">
+          <p>The <strong>altered scale</strong> is the 7th mode of melodic minor. It contains every possible alteration of the dominant chord: ♭9, ♯9, ♭5 (=♯11), ♭13. Playing it over a V7 chord creates maximum chromatic tension before resolving to I.</p>
+          <div class="chord-box">
+            <span class="chord-label">G Altered Scale (Ab Melodic Minor, 7th mode)</span>
+            <div class="scale-bar">
+              <span class="scale-note root">G</span>
+              <span class="scale-note blue">A♭</span>
+              <span class="scale-note blue">B♭</span>
+              <span class="scale-note whole">B</span>
+              <span class="scale-note blue">D♭</span>
+              <span class="scale-note blue">E♭</span>
+              <span class="scale-note whole">F</span>
+              <span class="scale-note root">G</span>
+            </div>
+          </div>
+          <p>Jazz pianists like Bill Evans, McCoy Tyner, and Chick Corea used altered scales extensively. The trick: on the V7 chord, play "outside" (using altered notes), then resolve dramatically to the I chord. The dissonance makes the resolution feel earned.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRITONE SUBSTITUTION -->
+  <section class="theory-section">
+    <div class="container">
+      <h2 class="reveal">Tritone Substitution</h2>
+      <p class="reveal">One of jazz harmony's most elegant discoveries: any dominant chord can be substituted with a dominant chord whose root is a tritone (augmented 4th / diminished 5th) away. Why? Because the two chords share the same guide tones (3rd and 7th), just inverted.</p>
+
+      <div class="tritone-visual reveal">
+        <div class="tv-chord">
+          <div class="tv-name">G7</div>
+          <div class="tv-label">Original Dominant</div>
+          <div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem;">Guide tones: B (3rd) & F (7th)</div>
+        </div>
+        <div class="tv-link">⟺</div>
+        <div class="tv-chord">
+          <div class="tv-name">D♭7</div>
+          <div class="tv-label">Tritone Sub</div>
+          <div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem;">Guide tones: F (3rd) & C♭/B (7th)</div>
+        </div>
+        <div class="tv-link">→</div>
+        <div class="tv-chord">
+          <div class="tv-name">Cmaj7</div>
+          <div class="tv-label">Resolution (same)</div>
+        </div>
+      </div>
+
+      <div class="tip-box reveal">
+        <div class="tip-label">Hear it in action</div>
+        <p>In "Autumn Leaves," the original changes have G7 → Cmaj7. A jazz musician might substitute D♭7 → Cmaj7, which creates a chromatic half-step bassline descent: D♭ → C. This half-step resolution creates an incredibly satisfying pull into the tonic. Listen to how often you can hear this bass motion in jazz recordings.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RHYTHM -->
+  <section class="theory-section">
+    <div class="container">
+      <h2 class="reveal">Rhythm: Swing, Comping &amp; Time</h2>
+
+      <div class="two-col reveal">
+        <div>
+          <h3>The Swing Feel</h3>
+          <p>Written jazz is typically in 4/4 time with eighth notes — but these are not played straight (equal duration). They are "swung" — the first eighth note of each pair is longer, the second shorter. The exact ratio varies by tempo and style, from near-triplet feel (1:2) at slow tempos to almost straight at very fast tempos.</p>
+          <div class="chord-box">
+            <span class="chord-label">Written vs. Played</span>
+            <p style="color:rgba(250,245,232,0.8);">Written: ♩♪ ♩♪ ♩♪ ♩♪</p>
+            <p style="color:var(--gold-lt);">Played:  ♩. ♪ ♩. ♪ ♩. ♪ ♩. ♪</p>
+            <p style="color:rgba(250,245,232,0.5);font-size:0.8rem;">(approximately — the feel is not precisely notatable)</p>
+          </div>
+          <p>Crucially, jazz rhythm is about <em>feel</em>, not precise mathematical ratios. The fact that you cannot perfectly notate jazz swing is part of why it has to be learned by ear and by playing — not by reading.</p>
+        </div>
+        <div>
+          <h3>Comping</h3>
+          <p><strong>Comping</strong> (accompanying/complementing) is what a pianist or guitarist does when another musician solos — rhythmically varied chord stabs, responsive to the soloist, providing harmonic direction without overplaying. It's a conversation.</p>
+          <p>Great compers like Herbie Hancock or McCoy Tyner listen intently and react — pushing the soloist, leaving space, setting up phrases, creating rhythmic counterpoint. Bad comping gets in the way. The rule: if in doubt, leave space.</p>
+          <div class="info-box">
+            <div class="info-label">Trading Fours</div>
+            <p>"Trading fours" means each musician improvises for four bars alternately — soloist, drummer, soloist, drummer (or two soloists). It creates dialogue and structure within free improvisation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORM -->
+  <section class="theory-section">
+    <div class="container">
+      <h2 class="reveal">Form: How Jazz Standards Are Structured</h2>
+      <p class="reveal">Jazz standards typically follow one of a handful of forms. Understanding form is essential for navigating through a tune.</p>
+
+      <div class="card-grid reveal">
+        <div class="card">
+          <h4>AABA (32 bars)</h4>
+          <p>The most common form. 8 bars of A (main theme) repeated, 8 bars of B (bridge — different key/feel), then A again. "Autumn Leaves," "I Got Rhythm," "All The Things You Are" (with variation).</p>
+        </div>
+        <div class="card">
+          <h4>AABA (with TAG)</h4>
+          <p>Same as above but ending with a short "turnaround" extension — often 2-4 bars added to bring the form back to the top smoothly.</p>
+        </div>
+        <div class="card">
+          <h4>12-Bar Blues</h4>
+          <p>The fundamental blues form: 4 bars of I, 2 of IV, 2 of I, 1 of V, 1 of IV, 2 of I. Jazz blues adds sophisticated chord substitutions within this skeleton.</p>
+        </div>
+        <div class="card">
+          <h4>ABAC (32 bars)</h4>
+          <p>A section, B section (new material), A section repeated, C section (different ending). "Stardust," "What Is This Thing Called Love." Less predictable than AABA.</p>
+        </div>
+        <div class="card">
+          <h4>Modal / Open Form</h4>
+          <p>No fixed length — the soloist and band improvise over one or two chords/scales for as long as feels right. Miles Davis's "So What," Coltrane's "A Love Supreme" Part III.</p>
+        </div>
+        <div class="card">
+          <h4>Free Form</h4>
+          <p>No predetermined structure whatsoever. The music evolves in real time through collective improvisation. Ornette Coleman's "Free Jazz," most of the AACM's work.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="container">
+    <div class="footer-deco">♪ ♫ ♩ ♬</div>
+    <p>Jazz Almanac — A celebration of the world's greatest improvisational art form.</p>
+    <p class="mt-2"><a href="index.html">Home</a> · <a href="history.html">History</a> · <a href="styles-players.html">Styles</a> · <a href="theory.html">Theory</a> · <a href="beginners.html">Beginners</a> · <a href="neuroscience.html">Neuroscience</a></p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

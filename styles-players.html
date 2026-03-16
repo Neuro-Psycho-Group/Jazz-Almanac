@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Styles &amp; Players — Jazz Almanac</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/nav.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <style>
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 2.5rem;
+      padding-bottom: 0;
+    }
+    .tab-btn {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      margin-bottom: -2px;
+    }
+    .tab-btn:hover { color: var(--gold); }
+    .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Region badge */
+    .region-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      padding: 0.2em 0.6em;
+      border-radius: 1px;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Genre cards */
+    .genre-header {
+      border-left: 4px solid var(--gold);
+      padding-left: 1rem;
+      margin-bottom: 2rem;
+    }
+    .genre-header h3 { margin-bottom: 0.25rem; }
+    .genre-header .genre-years {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .players-section {
+      padding: 4rem 0;
+    }
+    .players-section:nth-child(even) { background: var(--paper); }
+
+    /* World Map Diagram */
+    .world-jazz-map {
+      background: var(--ink);
+      border-radius: 4px;
+      padding: 2rem;
+      margin: 3rem 0;
+      position: relative;
+    }
+    .world-jazz-map h3 { color: var(--gold-lt); margin-bottom: 1.5rem; font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; }
+    .map-regions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .map-region {
+      border: 1px solid rgba(184,131,42,0.25);
+      border-radius: 2px;
+      padding: 1rem;
+      transition: border-color 0.2s, background 0.2s;
+      cursor: default;
+    }
+    .map-region:hover {
+      border-color: var(--gold);
+      background: rgba(184,131,42,0.05);
+    }
+    .map-region .region-flag { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .map-region .region-name { color: var(--cream); font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; font-family: var(--font-display); }
+    .map-region .region-style { color: var(--gold-lt); font-size: 0.75rem; font-family: var(--font-mono); margin-bottom: 0.5rem; }
+    .map-region .region-players { color: rgba(250,245,232,0.55); font-size: 0.75rem; line-height: 1.5; }
+
+    /* Instrument icons */
+    .instrument-icon { font-size: 2rem; margin-bottom: 0.5rem; display: block; }
+
+    /* Signature style */
+    .sig-style {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 2px;
+      margin-top: 1rem;
+    }
+    .sig-style .ss-label { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.3rem; }
+    .sig-style p { font-size: 0.88rem; color: var(--ink-soft); margin: 0; }
+
+    .big-player-card {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      border-radius: var(--radius);
+      position: relative;
+      overflow: hidden;
+    }
+    .big-player-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--gold), var(--teal));
+    }
+    .big-player-card .bpc-left { border-right: 1px solid var(--border); padding-right: 2rem; }
+    .big-player-card .bpc-name { font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; margin-bottom: 0.25rem; }
+    .big-player-card .bpc-dates { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 0.75rem; }
+    .big-player-card .bpc-instr { font-size: 0.8rem; color: var(--gold-dk); font-family: var(--font-mono); }
+    .big-player-card h4 { margin-bottom: 0.4rem; font-size: 0.95rem; }
+    .big-player-card p { font-size: 0.9rem; line-height: 1.65; }
+    .key-albums { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+    .album-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      background: var(--ink);
+      color: var(--gold-lt);
+      padding: 0.25em 0.6em;
+      border-radius: 1px;
+      font-style: italic;
+    }
+
+    @media (max-width: 650px) {
+      .big-player-card { grid-template-columns: 1fr; }
+      .big-player-card .bpc-left { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; padding-bottom: 1.5rem; margin-bottom: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-note">♪</span> Jazz Almanac</a>
+    <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="styles-players.html">Styles &amp; Players</a></li>
+      <li><a href="theory.html">Theory</a></li>
+      <li><a href="beginners.html">For Beginners</a></li>
+      <li><a href="neuroscience.html">Neuroscience</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+
+  <div class="section-hero">
+    <div class="deco-corner tl"></div>
+    <div class="deco-corner br"></div>
+    <div class="container">
+      <span class="subtitle">The Who &amp; What</span>
+      <h1>Styles &amp; <em>Players</em></h1>
+      <p>Jazz is a global art form. From New Orleans to Havana, São Paulo to Tokyo — the players who shaped a century of music.</p>
+    </div>
+  </div>
+
+  <!-- WORLD MAP -->
+  <section class="content-section">
+    <div class="container">
+      <h2 class="reveal text-center mb-4">Jazz Around the World</h2>
+      <div class="world-jazz-map reveal">
+        <h3>🌍 Regional Jazz Traditions</h3>
+        <div class="map-regions">
+          <div class="map-region">
+            <div class="region-flag">🇺🇸</div>
+            <div class="region-name">USA</div>
+            <div class="region-style">Bebop · Swing · Modal · Free</div>
+            <div class="region-players">Armstrong, Parker, Davis, Coltrane, Monk, Ellington, Holiday</div>
+          </div>
+          <div class="map-region">
+            <div class="region-flag">🇨🇺</div>
+            <div class="region-name">Cuba</div>
+            <div class="region-style">Afro-Cuban · Latin Jazz · Cubop</div>
+            <div class="region-players">Irakere, Chucho Valdés, Paquito D'Rivera, Arturo Sandoval, Chico O'Farrill</div>
+          </div>
+          <div class="map-region">
+            <div class="region-flag">🇧🇷</div>
+            <div class="region-name">Brazil</div>
+            <div class="region-style">Bossa Nova · Samba-Jazz · MPB</div>
+            <div class="region-players">João Gilberto, Astrud Gilberto, Antonio Carlos Jobim, Hermeto Pascoal, Egberto Gismonti</div>
+          </div>
+          <div class="map-region">
+            <div class="region-flag">🇬🇧</div>
+            <div class="region-name">UK</div>
+            <div class="region-style">Nu Jazz · Contemporary · Grime-Jazz</div>
+            <div class="region-players">Shabaka Hutchings, Nubya Garcia, GoGo Penguin, Courtney Pine, Tommy Smith</div>
+          </div>
+          <div class="map-region">
+            <div class="region-flag">🇫🇷</div>
+            <div class="region-name">France</div>
+            <div class="region-style">Manouche · Gypsy Jazz</div>
+            <div class="region-players">Django Reinhardt, Stéphane Grappelli, Bireli Lagrene, Richard Galliano</div>
+          </div>
+          <div class="map-region">
+            <div class="region-flag">🇯🇵</div>
+            <div class="region-name">Japan</div>
+            <div class="region-style">J-Jazz · Contemporary</div>
+            <div class="region-players">Yosuke Yamashita, Sadao Watanabe, Hiromi Uehara, Ryo Fukui</div>
+          </div>
+          <div class="map-region">
+            <div class="region-flag">🇿🇦</div>
+            <div class="region-name">South Africa</div>
+            <div class="region-style">Cape Jazz · Township Jazz</div>
+            <div class="region-players">Abdullah Ibrahim, Hugh Masekela, Miriam Makeba, Chris McGregor</div>
+          </div>
+          <div class="map-region">
+            <div class="region-flag">🇦🇷</div>
+            <div class="region-name">Argentina</div>
+            <div class="region-style">Latin Jazz · Tango-Jazz</div>
+            <div class="region-players">Gato Barbieri, Astor Piazzolla (tango-jazz hybrid), Gary Burton collaborations</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GENRE TABS -->
+  <section class="content-section">
+    <div class="container">
+      <h2 class="reveal mb-4">Major Styles &amp; Genres</h2>
+
+      <div data-tabs class="reveal">
+        <div class="tab-bar">
+          <button class="tab-btn" data-tab-btn="afrocuban">Afro-Cuban</button>
+          <button class="tab-btn" data-tab-btn="bossa">Bossa Nova</button>
+          <button class="tab-btn" data-tab-btn="manouche">Gypsy Jazz</button>
+          <button class="tab-btn" data-tab-btn="fusion">Jazz Fusion</button>
+          <button class="tab-btn" data-tab-btn="avantgarde">Avant-Garde</button>
+          <button class="tab-btn" data-tab-btn="soul">Soul Jazz</button>
+          <button class="tab-btn" data-tab-btn="nujazz">Nu Jazz</button>
+        </div>
+
+        <!-- AFRO-CUBAN -->
+        <div data-tab-panel="afrocuban" class="tab-panel">
+          <div class="region-badge">🇨🇺 Cuba · New York · 1940s onwards</div>
+          <div class="genre-header">
+            <h3>Afro-Cuban Jazz &amp; Cubop</h3>
+            <div class="genre-years">1940s – Present</div>
+          </div>
+          <div class="two-col">
+            <div>
+              <p>Afro-Cuban jazz emerged from the meeting of bebop and Cuban son, rumba and mambo rhythms in New York City. The crucial figure was percussionist <strong>Chano Pozo</strong>, who joined Dizzy Gillespie's big band in 1947. Pozo brought the clave rhythm and Afro-Cuban religious percussion into the bebop harmonic language — creating <em>Cubop</em>.</p>
+              <p>The <strong>clave</strong> (a two-bar rhythmic pattern in 3-2 or 2-3) organises all Cuban music. In jazz, this created a polyrhythmic dialogue between jazz's swing feel and Cuban's Latin feel — generating an irresistible rhythmic complexity.</p>
+              <p>Pianist <strong>Chucho Valdés</strong> and his group <strong>Irakere</strong> (formed 1973) synthesised Cuban son, batá drums, bebop, and rock into a towering Afro-Cuban jazz idiom. Their music had direct African roots: Valdés's father Bebo Valdés was already integrating Afro-Cuban religious (Lucumí/Santería) music into jazz in the 1940s.</p>
+            </div>
+            <div>
+              <div class="tip-box">
+                <div class="tip-label">The Clave</div>
+                <p>The 3-2 clave is the foundational rhythmic cell:</p>
+                <div class="chord-box" style="margin-top:0.5rem;">
+                  <span class="chord-label">3-2 Son Clave</span>
+                  <p style="font-size: 1.3rem; letter-spacing: 0.4em; color: var(--gold-lt);">X · X · X · · X · · X · · · · ·</p>
+                  <p style="font-size: 0.8rem; color: rgba(250,245,232,0.6);">Beat: 1 · 2 · 3 · · 1 · · 2 · · · · ·</p>
+                </div>
+              </div>
+              <div class="key-figures">
+                <span class="key-figure-tag">Chucho Valdés — piano</span>
+                <span class="key-figure-tag">Chano Pozo — congas</span>
+                <span class="key-figure-tag">Paquito D'Rivera — sax/clarinet</span>
+                <span class="key-figure-tag">Arturo Sandoval — trumpet</span>
+                <span class="key-figure-tag">Tito Puente — timbales</span>
+                <span class="key-figure-tag">Mongo Santamaría — congas</span>
+                <span class="key-figure-tag">Eddie Palmieri — piano</span>
+                <span class="key-figure-tag">Chico O'Farrill — arranger</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOSSA NOVA -->
+        <div data-tab-panel="bossa" class="tab-panel">
+          <div class="region-badge">🇧🇷 Brazil · 1958 onwards</div>
+          <div class="genre-header">
+            <h3>Bossa Nova &amp; Brazilian Jazz</h3>
+            <div class="genre-years">1958 – Present</div>
+          </div>
+          <div class="two-col">
+            <div>
+              <p>Bossa nova ("new tendency") emerged in Rio de Janeiro in the late 1950s from the meeting of samba rhythms with jazz harmonies. <strong>João Gilberto</strong>'s understated guitar style and barely-above-a-whisper vocals, combined with <strong>Antônio Carlos Jobim</strong>'s sophisticated harmonies and melodies, created a sound of extraordinary intimacy and beauty.</p>
+              <p>The 1962 Carnegie Hall concert, and subsequent collaboration between Jobim, Gilberto, and Stan Getz (whose tenor sax recordings of bossa nova sold millions), introduced the music globally. <em>The Girl from Ipanema</em> became one of the most recorded songs in history. But bossa nova at its core was deeply sophisticated — Jobim's chord voicings use extensions and voice-leading of near-Debussy complexity.</p>
+              <p><strong>Hermeto Pascoal</strong> took Brazilian music further into free improvisation, using instruments including kitchen pots, animals, and his own voice as harmonic tools. <strong>Egberto Gismonti</strong> brought northeastern Brazilian folk music into a jazz-classical synthesis on solo guitar and piano.</p>
+            </div>
+            <div>
+              <div class="info-box">
+                <div class="info-label">The Samba-Jazz Link</div>
+                <p>Bossa nova rhythmically simplifies samba (stripping out the complex batucada percussion) while harmonically enriching it. The bossa nova guitar pattern is essentially a displaced samba feel played by a single instrument.</p>
+              </div>
+              <div class="key-figures">
+                <span class="key-figure-tag">João Gilberto — guitar/vocals</span>
+                <span class="key-figure-tag">Antônio Carlos Jobim — piano/composition</span>
+                <span class="key-figure-tag">Stan Getz — tenor sax (USA)</span>
+                <span class="key-figure-tag">Astrud Gilberto — vocals</span>
+                <span class="key-figure-tag">Elis Regina — vocals</span>
+                <span class="key-figure-tag">Hermeto Pascoal — multi-instrumentalist</span>
+                <span class="key-figure-tag">Egberto Gismonti — guitar/piano</span>
+                <span class="key-figure-tag">Milton Nascimento — vocals/guitar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MANOUCHE -->
+        <div data-tab-panel="manouche" class="tab-panel">
+          <div class="region-badge">🇫🇷 France · Belgium · 1930s</div>
+          <div class="genre-header">
+            <h3>Gypsy Jazz (Jazz Manouche)</h3>
+            <div class="genre-years">1930s – Present</div>
+          </div>
+          <p>Born from the genius of Belgian Romani guitarist <strong>Django Reinhardt</strong> in 1930s Paris, Gypsy jazz (or <em>jazz manouche</em>) is one of Europe's greatest musical achievements. Django created a style of astonishing speed and beauty — all the more remarkable because two fingers of his left hand were paralysed after a caravan fire at age 18.</p>
+          <p>The signature ensemble is guitar-led: a lead guitar, two rhythm guitars playing "la pompe" (a distinctive chomp-and-release stroke), and a violin, exemplified by Django's partnership with violinist <strong>Stéphane Grappelli</strong> in the Hot Club de France. The music is deeply melodic, swings ferociously, and contains a distinctly European melancholy.</p>
+          <p>Today Gypsy jazz is played by communities across France, Belgium, Germany, and the Netherlands. Players like <strong>Biréli Lagrène</strong>, the Rosenberg Trio, and Fapy Lafertin keep the tradition alive while pushing it forward.</p>
+          <div class="key-figures">
+            <span class="key-figure-tag">Django Reinhardt — guitar</span>
+            <span class="key-figure-tag">Stéphane Grappelli — violin</span>
+            <span class="key-figure-tag">Biréli Lagrène — guitar</span>
+            <span class="key-figure-tag">Rosenberg Trio</span>
+            <span class="key-figure-tag">Richard Galliano — accordion</span>
+          </div>
+        </div>
+
+        <!-- FUSION -->
+        <div data-tab-panel="fusion" class="tab-panel">
+          <div class="region-badge">🌍 USA · UK · Worldwide · 1969 onwards</div>
+          <div class="genre-header">
+            <h3>Jazz Fusion &amp; Jazz-Rock</h3>
+            <div class="genre-years">1969 – Present</div>
+          </div>
+          <p>When Miles Davis plugged in his keyboards and surrounded himself with rock-influenced rhythms in 1969–70, a new genre was born. Fusion embraced electric instruments, rock and funk rhythms, and studio effects — while retaining jazz's improvisation and harmonic sophistication.</p>
+          <p>Weather Report (Shorter/Zawinul) were perhaps the most musically adventurous fusion group; their bassist <strong>Jaco Pastorius</strong> revolutionised the electric bass with his fretless playing and orchestral approach. Chick Corea's Return to Forever ranged from delicate acoustic explorations to headbanging prog-rock. John McLaughlin's Mahavishnu Orchestra brought Indian classical music and Hindu philosophy into a mind-bending rock-jazz synthesis.</p>
+          <div class="key-figures">
+            <span class="key-figure-tag">Miles Davis — trumpet</span>
+            <span class="key-figure-tag">Weather Report</span>
+            <span class="key-figure-tag">Jaco Pastorius — bass</span>
+            <span class="key-figure-tag">Mahavishnu Orchestra</span>
+            <span class="key-figure-tag">Return to Forever</span>
+            <span class="key-figure-tag">Herbie Hancock</span>
+            <span class="key-figure-tag">Pat Metheny — guitar</span>
+          </div>
+        </div>
+
+        <!-- AVANT-GARDE -->
+        <div data-tab-panel="avantgarde" class="tab-panel">
+          <div class="region-badge">🇺🇸 USA · 1960s onwards</div>
+          <div class="genre-header">
+            <h3>Avant-Garde &amp; Free Jazz</h3>
+            <div class="genre-years">1960s – Present</div>
+          </div>
+          <p>Avant-garde jazz rejected all pre-existing conventions: tonal harmony, regular meter, conventional form. It was jazz's most radical rupture — and most politically charged. Many of its proponents explicitly linked musical freedom to civil rights and Black liberation.</p>
+          <p><strong>Ornette Coleman</strong>'s "harmolodics" proposed that any element of music — harmony, melody, rhythm — could be used as freely as any other. Sun Ra's Arkestra connected jazz to ancient Egyptian mythology and space-age philosophy. The AACM (Association for the Advancement of Creative Musicians) in Chicago became a collective for composers/improvisers exploring the outer limits.</p>
+          <div class="key-figures">
+            <span class="key-figure-tag">Ornette Coleman — alto sax</span>
+            <span class="key-figure-tag">Sun Ra — piano/bandleader</span>
+            <span class="key-figure-tag">Cecil Taylor — piano</span>
+            <span class="key-figure-tag">Albert Ayler — tenor sax</span>
+            <span class="key-figure-tag">Anthony Braxton — reeds</span>
+            <span class="key-figure-tag">Henry Threadgill — reeds</span>
+          </div>
+        </div>
+
+        <!-- SOUL JAZZ -->
+        <div data-tab-panel="soul" class="tab-panel">
+          <div class="region-badge">🇺🇸 USA · 1950s–60s</div>
+          <div class="genre-header">
+            <h3>Soul Jazz &amp; Funk Jazz</h3>
+            <div class="genre-years">1950s – 1970s</div>
+          </div>
+          <p>Soul jazz combined the blues and gospel feeling of hard bop with the rhythmic energy of R&B. The Hammond organ became its signature instrument — <strong>Jimmy Smith</strong>'s fat, grooving organ trio sound defined the genre. The music was accessible and deeply swinging, shot through with church feeling.</p>
+          <p><strong>Horace Silver</strong>'s funky piano grooves, <strong>Art Blakey</strong>'s thundering drumming, the Crusaders' early jazzy work — all pointed toward the intersection of jazz and what would become funk. <strong>Cannonball Adderley</strong>'s quintet brought this to mainstream popularity, while Lou Donaldson and Grant Green explored soul-jazz on Blue Note records.</p>
+          <div class="key-figures">
+            <span class="key-figure-tag">Jimmy Smith — organ</span>
+            <span class="key-figure-tag">Horace Silver — piano</span>
+            <span class="key-figure-tag">Cannonball Adderley — alto sax</span>
+            <span class="key-figure-tag">Grant Green — guitar</span>
+            <span class="key-figure-tag">Lou Donaldson — alto sax</span>
+            <span class="key-figure-tag">Les McCann — piano</span>
+          </div>
+        </div>
+
+        <!-- NU JAZZ -->
+        <div data-tab-panel="nujazz" class="tab-panel">
+          <div class="region-badge">🌍 Global · 1990s onwards</div>
+          <div class="genre-header">
+            <h3>Nu Jazz, Acid Jazz &amp; Contemporary</h3>
+            <div class="genre-years">1990s – Present</div>
+          </div>
+          <p>Nu jazz and acid jazz brought jazz back to dancefloors in the 1990s, blending jazz improvisation with hip-hop production, house music rhythms, and neo-soul harmony. Labels like Talkin Loud (Gilles Peterson) and the Acid Jazz label became cultural focal points.</p>
+          <p>Today's contemporary jazz scene is explosive. <strong>Kamasi Washington</strong>'s dense, spiritual saxophone (following in Coltrane's tradition) bridged jazz and hip-hop communities. <strong>Robert Glasper</strong>'s Experiment blurred jazz with neo-soul. The London scene's <strong>Shabaka Hutchings</strong> led multiple groundbreaking groups simultaneously. <strong>Esperanza Spalding</strong> became the first jazz artist to win Grammy Best New Artist. <strong>GoGo Penguin</strong> created a piano-trio sound influenced by electronic music and post-rock.</p>
+          <div class="key-figures">
+            <span class="key-figure-tag">Kamasi Washington — tenor sax</span>
+            <span class="key-figure-tag">Robert Glasper — piano</span>
+            <span class="key-figure-tag">Esperanza Spalding — bass/vocals</span>
+            <span class="key-figure-tag">Shabaka Hutchings — reeds</span>
+            <span class="key-figure-tag">GoGo Penguin — trio</span>
+            <span class="key-figure-tag">Nubya Garcia — tenor sax</span>
+            <span class="key-figure-tag">Hiromi Uehara — piano</span>
+            <span class="key-figure-tag">Brad Mehldau — piano</span>
+          </div>
+        </div>
+
+      </div><!-- end tabs -->
+    </div>
+  </section>
+
+  <!-- ICONIC PLAYERS -->
+  <section class="players-section">
+    <div class="container">
+      <h2 class="reveal mb-4">The Icons — Essential Listening</h2>
+
+      <div class="big-player-card reveal">
+        <div class="bpc-left">
+          <span class="instrument-icon">🎺</span>
+          <div class="bpc-name">Miles Davis</div>
+          <div class="bpc-dates">1926 – 1991</div>
+          <div class="bpc-instr">Trumpet</div>
+          <div class="key-albums mt-2">
+            <span class="album-tag">Birth of the Cool</span>
+            <span class="album-tag">Kind of Blue</span>
+            <span class="album-tag">Bitches Brew</span>
+            <span class="album-tag">In a Silent Way</span>
+          </div>
+        </div>
+        <div>
+          <p>No single musician was more central to jazz's evolution across five decades. Davis initiated or directly catalysed Cool Jazz, Hard Bop, Modal Jazz, Jazz Fusion — each time walking away from the style he'd pioneered before it became comfortable. His genius was curation as much as invention: knowing which musicians to put in a room together.</p>
+          <p>His trumpet tone — especially in his late acoustic period — was one of the most immediately recognisable sounds in music: muted, melancholy, intimate. On electric albums he played with a wah-wah pedal and studio manipulation. He was also, not incidentally, a sharp dresser and genuine cultural provocateur who refused to play for white audiences only.</p>
+          <div class="sig-style">
+            <div class="ss-label">Signature Approach</div>
+            <p>Economy. Miles left space. Where Parker played 100 notes, Miles played 10, and each one bled. "It takes a long time to play like yourself."</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="big-player-card reveal">
+        <div class="bpc-left">
+          <span class="instrument-icon">🎷</span>
+          <div class="bpc-name">John Coltrane</div>
+          <div class="bpc-dates">1926 – 1967</div>
+          <div class="bpc-instr">Tenor &amp; Soprano Saxophone</div>
+          <div class="key-albums mt-2">
+            <span class="album-tag">Giant Steps</span>
+            <span class="album-tag">A Love Supreme</span>
+            <span class="album-tag">My Favorite Things</span>
+            <span class="album-tag">Ascension</span>
+          </div>
+        </div>
+        <div>
+          <p>Coltrane's evolution in just 12 years of recording is staggering. From hard bop sideman (with Miles) to the harmonic revolution of <em>Giant Steps</em> (with its "Coltrane changes" — rapid modulations through major thirds) to the modal spirituality of <em>A Love Supreme</em> to the free avant-garde of <em>Ascension</em>. He died at 40.</p>
+          <p>His <em>sheets of sound</em> technique — playing multiple arpeggiated notes so fast they create harmonic density — was revolutionary. His soprano saxophone playing on <em>My Favorite Things</em> introduced many to that instrument. His Classic Quartet (with McCoy Tyner, Jimmy Garrison, Elvin Jones) is considered one of the greatest small groups in music history.</p>
+          <div class="sig-style">
+            <div class="ss-label">Coltrane Changes</div>
+            <p>Substituting standard ii-V-I progressions with chord roots a major third apart: Cmaj7 → E♭maj7 → Gmaj7 → Cmaj7. Harmonic motion through the triangle.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="big-player-card reveal">
+        <div class="bpc-left">
+          <span class="instrument-icon">🎹</span>
+          <div class="bpc-name">Thelonious Monk</div>
+          <div class="bpc-dates">1917 – 1982</div>
+          <div class="bpc-instr">Piano &amp; Composition</div>
+          <div class="key-albums mt-2">
+            <span class="album-tag">Brilliant Corners</span>
+            <span class="album-tag">Thelonious Alone</span>
+            <span class="album-tag">Monk's Dream</span>
+          </div>
+        </div>
+        <div>
+          <p>Monk's music sounds like nothing else. His piano technique was unconventional — flat fingers, angular melodies, unexpected silences. His compositions (<em>Round Midnight</em>, <em>Straight No Chaser</em>, <em>Blue Monk</em>, <em>Well You Needn't</em>) are among the most performed in jazz, yet remain peculiar and resistant to easy interpretation.</p>
+          <p>He was a bebop pioneer — present at those Minton's sessions — but his music was too idiosyncratic to be called any genre. His "wrong notes" were not errors; they were deliberate dissonances that resolved in unexpected ways. The silences in his solos are as important as the notes.</p>
+        </div>
+      </div>
+
+      <div class="big-player-card reveal">
+        <div class="bpc-left">
+          <span class="instrument-icon">🎙</span>
+          <div class="bpc-name">Billie Holiday</div>
+          <div class="bpc-dates">1915 – 1959</div>
+          <div class="bpc-instr">Vocals</div>
+          <div class="key-albums mt-2">
+            <span class="album-tag">Lady in Satin</span>
+            <span class="album-tag">Songs for Distingué Lovers</span>
+            <span class="album-tag">Strange Fruit</span>
+          </div>
+        </div>
+        <div>
+          <p>Billie Holiday transformed the art of jazz singing. Her voice was not technically perfect — small in range, sometimes wavering — but her phrasing was unlike anyone's. She treated the voice as a jazz horn, improvising melodies, lagging behind the beat, bending notes. She taught a generation of singers that feeling mattered more than technique.</p>
+          <p><em>Strange Fruit</em> (1939) — a devastating protest song about lynching — was one of the first political protest songs recorded by a major American artist. It nearly destroyed her career with some labels. It defines hers.</p>
+        </div>
+      </div>
+
+      <div class="big-player-card reveal">
+        <div class="bpc-left">
+          <span class="instrument-icon">🥁</span>
+          <div class="bpc-name">Art Blakey</div>
+          <div class="bpc-dates">1919 – 1990</div>
+          <div class="bpc-instr">Drums</div>
+          <div class="key-albums mt-2">
+            <span class="album-tag">Moanin'</span>
+            <span class="album-tag">A Night at Birdland</span>
+            <span class="album-tag">Free For All</span>
+          </div>
+        </div>
+        <div>
+          <p>Art Blakey and the Jazz Messengers functioned as a jazz conservatory for 40 years. He gave early careers to Clifford Brown, Lee Morgan, Freddie Hubbard, Wayne Shorter, Keith Jarrett, Wynton Marsalis, and dozens more. His philosophy: push young musicians, let them find themselves, and always swing hard.</p>
+          <p>His drumming was volcanic. The press roll he used to build to climaxes, his decisive rim shots, his ability to play polyrhythmically while still driving the band — all made him one of the most influential drummers in music.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="container">
+    <div class="footer-deco">♪ ♫ ♩ ♬</div>
+    <p>Jazz Almanac — A celebration of the world's greatest improvisational art form.</p>
+    <p class="mt-2"><a href="index.html">Home</a> · <a href="history.html">History</a> · <a href="styles-players.html">Styles</a> · <a href="theory.html">Theory</a> · <a href="beginners.html">Beginners</a> · <a href="neuroscience.html">Neuroscience</a></p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

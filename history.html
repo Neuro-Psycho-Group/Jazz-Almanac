@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>History of Jazz — Jazz Almanac</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/nav.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <style>
+    .era-section {
+      padding: 4rem 0;
+      position: relative;
+    }
+    .era-section:nth-child(odd) { background: var(--paper); }
+
+    .era-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .era-year {
+      font-family: var(--font-display);
+      font-size: clamp(4rem, 10vw, 7rem);
+      font-weight: 900;
+      color: rgba(184,131,42,0.15);
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .era-title { flex: 1; }
+
+    .key-figures {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .key-figure-tag {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      background: var(--ink);
+      color: var(--gold-lt);
+      padding: 0.25em 0.7em;
+      border-radius: 1px;
+    }
+
+    /* Interactive Timeline (horizontal scroll) */
+    .timeline-scroll-wrap {
+      background: var(--ink);
+      padding: 3rem 0;
+      overflow-x: auto;
+    }
+    .timeline-scroll {
+      display: flex;
+      gap: 0;
+      min-width: max-content;
+      padding: 0 2rem;
+      position: relative;
+    }
+    .timeline-scroll::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      transform: translateY(-50%);
+    }
+    .tl-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      width: 160px;
+      flex-shrink: 0;
+      cursor: default;
+    }
+    .tl-node:nth-child(odd) { padding-bottom: 4rem; flex-direction: column-reverse; }
+    .tl-node:nth-child(even) { padding-top: 4rem; }
+    .tl-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 3px solid var(--ink);
+      box-shadow: 0 0 0 2px var(--gold);
+      flex-shrink: 0;
+      transition: transform 0.2s;
+    }
+    .tl-node:hover .tl-dot { transform: scale(1.5); }
+    .tl-content { text-align: center; }
+    .tl-content .tl-year {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+    }
+    .tl-content .tl-era {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin-top: 0.25rem;
+    }
+    .tl-content .tl-note {
+      font-size: 0.72rem;
+      color: rgba(250,245,232,0.5);
+      margin-top: 0.2rem;
+    }
+
+    /* Map note */
+    .geo-origin {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--bg-dark);
+      padding: 0.2em 0.6em;
+      border-radius: 1px;
+      margin-left: 0.5rem;
+    }
+    .geo-origin::before { content: '📍'; font-size: 0.8rem; }
+
+    .influence-tree {
+      background: var(--ink);
+      border-radius: 4px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+    .influence-tree h4 { color: var(--gold-lt); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1rem; }
+    .influence-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.75rem;
+    }
+    .influence-node {
+      text-align: center;
+      padding: 0.75rem;
+      border: 1px solid rgba(184,131,42,0.2);
+      border-radius: 2px;
+    }
+    .influence-node .in-name { color: var(--cream); font-size: 0.9rem; font-weight: 600; font-family: var(--font-display); }
+    .influence-node .in-desc { color: rgba(250,245,232,0.5); font-size: 0.72rem; margin-top: 0.25rem; }
+    .influence-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-size: 1.4rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-note">♪</span> Jazz Almanac</a>
+    <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="styles-players.html">Styles &amp; Players</a></li>
+      <li><a href="theory.html">Theory</a></li>
+      <li><a href="beginners.html">For Beginners</a></li>
+      <li><a href="neuroscience.html">Neuroscience</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+
+  <!-- HERO -->
+  <div class="section-hero">
+    <div class="deco-corner tl"></div>
+    <div class="deco-corner br"></div>
+    <div class="container">
+      <span class="subtitle">The Story</span>
+      <h1>History of <em>Jazz</em></h1>
+      <p>One hundred and thirty years of revolution — born in New Orleans, raised by the world.</p>
+    </div>
+  </div>
+
+  <!-- HORIZONTAL TIMELINE -->
+  <div class="timeline-scroll-wrap">
+    <p style="text-align:center;font-family:var(--font-mono);font-size:0.7rem;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;margin-bottom:1.5rem;">Scroll → The Jazz Timeline</p>
+    <div class="timeline-scroll">
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-year">~1895–1910</div>
+          <div class="tl-era">New Orleans Jazz</div>
+          <div class="tl-note">Ragtime + Blues + Gospel</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-year">1920s</div>
+          <div class="tl-era">Classic Jazz</div>
+          <div class="tl-note">Louis Armstrong era</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-year">1930s–40s</div>
+          <div class="tl-era">Swing</div>
+          <div class="tl-note">Big bands, mass appeal</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-year">1940s</div>
+          <div class="tl-era">Bebop</div>
+          <div class="tl-note">Parker, Gillespie</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-year">1950s</div>
+          <div class="tl-era">Cool Jazz</div>
+          <div class="tl-note">Miles, Birth of the Cool</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-year">Late 1950s</div>
+          <div class="tl-era">Hard Bop</div>
+          <div class="tl-note">Soul, R&amp;B influence</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-year">Early 1960s</div>
+          <div class="tl-era">Modal Jazz</div>
+          <div class="tl-note">Coltrane, scales over chords</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-year">Mid-1960s</div>
+          <div class="tl-era">Free Jazz</div>
+          <div class="tl-note">Ornette Coleman, no rules</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-year">Late 1960s–70s</div>
+          <div class="tl-era">Jazz Fusion</div>
+          <div class="tl-note">Electric + rock elements</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-year">1980s</div>
+          <div class="tl-era">Neobop / Revival</div>
+          <div class="tl-note">Wynton Marsalis</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-year">1990s–2000s</div>
+          <div class="tl-era">Nu Jazz &amp; Acid Jazz</div>
+          <div class="tl-note">Electronic influences</div>
+        </div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-year">2010s–now</div>
+          <div class="tl-era">Contemporary</div>
+          <div class="tl-note">Kamasi, Esperanza, GoGo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROOTS -->
+  <section class="era-section">
+    <div class="container">
+      <div class="era-header">
+        <div class="era-year">1895</div>
+        <div class="era-title">
+          <span class="subtitle" style="font-family:var(--font-mono);font-size:0.75rem;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;">The Roots</span>
+          <h2>Born in New Orleans</h2>
+        </div>
+      </div>
+
+      <div class="influence-tree reveal">
+        <h4>The DNA of Jazz — Four Founding Streams</h4>
+        <div class="influence-grid">
+          <div class="influence-node">
+            <div class="in-name">West African Music</div>
+            <div class="in-desc">Polyrhythm, call-and-response, oral tradition, communal music-making</div>
+          </div>
+          <div class="influence-node">
+            <div class="in-name">Blues</div>
+            <div class="in-desc">The blue notes, bent pitches, 12-bar form, emotional directness</div>
+          </div>
+          <div class="influence-node">
+            <div class="in-name">Ragtime</div>
+            <div class="in-desc">Syncopated rhythms, piano virtuosity, European harmonic framework</div>
+          </div>
+          <div class="influence-node">
+            <div class="in-name">Gospel &amp; Spirituals</div>
+            <div class="in-desc">Improvisational spirit, call-and-response, profound emotional depth</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col reveal">
+        <div>
+          <p>Jazz was born in New Orleans — a city uniquely placed to birth this music. The Crescent City was a convergence point unlike any other: French, Spanish, African, Caribbean, and Indigenous cultures collided in its streets. In <strong>Congo Square</strong>, enslaved Africans were uniquely permitted to gather on Sundays, maintaining drumming traditions and songs that would later feed directly into jazz.</p>
+          <p>The city's brothels, honky-tonks, and saloons of <strong>Storyville</strong> — a legal red-light district — became the first professional venues for jazz musicians. A young cornetist named <strong>Buddy Bolden</strong> is often credited as the first jazz musician, leading his band from around 1895. His music fused blues, ragtime and a rawness that was new.</p>
+        </div>
+        <div>
+          <div class="tip-box">
+            <div class="tip-label">Key Concept</div>
+            <p>The term "jazz" itself is of disputed origin — possibly from a slang term in African-American vernacular, possibly from the French "jaser" (to chat/jabber), possibly from a musician named "Jasbo" Brown. The spelling "jass" was common in early recordings.</p>
+          </div>
+          <p>New Orleans's geography mattered: it was a port city where sailors from the Caribbean brought rhythms from Cuba, Trinidad, and Haiti. The <em>habanera</em> rhythm, the clave, the son — all found their way into the city's musical bloodstream.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLASSIC JAZZ -->
+  <section class="era-section">
+    <div class="container">
+      <div class="era-header">
+        <div class="era-year">1920s</div>
+        <div class="era-title">
+          <span class="subtitle" style="font-family:var(--font-mono);font-size:0.75rem;letter-spacing:0.15em;color:var(--gold);text-transform:uppercase;">The Great Migration</span>
+          <h2>The Jazz Age</h2>
+        </div>
+      </div>
+      <div class="reveal">
+        <p>When <strong>Louis Armstrong</strong> moved from New Orleans to Chicago in 1922, jazz traveled with him. The <em>Great Migration</em> — the movement of millions of Black Americans northward — carried jazz to Chicago, New York, Kansas City and beyond. This was the era of the <strong>Harlem Renaissance</strong>, when African-American art, literature and music exploded into mainstream consciousness.</p>
+        <p>Louis Armstrong's Hot Five and Hot Seven recordings (1925–28) are arguably the most important in jazz history. He essentially invented the jazz solo as we know it — long melodic lines built from improvisation, rhythmically inventive, emotionally direct. Meanwhile, <strong>Duke Ellington</strong> was composing for large orchestras, proving jazz could be both popular and sophisticated.</p>
+        <div class="key-figures">
+          <span class="key-figure-tag">Louis Armstrong — trumpet/vocals</span>
+          <span class="key-figure-tag">Duke Ellington — piano/composition</span>
+          <span class="key-figure-tag">Jelly Roll Morton — piano</span>
+          <span class="key-figure-tag">Bessie Smith — vocals</span>
+          <span class="key-figure-tag">Sidney Bechet — soprano sax</span>
+          <span class="key-figure-tag">Fats Waller — piano</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SWING -->
+  <section class="era-section">
+    <div class="container">
+      <div class="era-header">
+        <div class="era-year">1930s</div>
+        <div class="era-title">
+          <h2>Swing &amp; The Big Band Era</h2>
+        </div>
+      </div>
+      <div class="two-col reveal">
+        <div>
+          <p>Swing was jazz's first mass cultural phenomenon. As America emerged from the Great Depression, big band jazz became dance music for the nation. <strong>Benny Goodman</strong>'s 1935 engagement at the Palomar Ballroom in Los Angeles is often cited as the "birth of the Swing Era" — young people danced wildly to what had been considered a Black underground art form.</p>
+          <p>The format was large orchestras — typically 15–20 musicians — with sections of brass, reeds, and rhythm. Arrangers like <strong>Fletcher Henderson</strong> and <strong>Billy Strayhorn</strong> (Ellington's collaborator) wrote sophisticated charts that allowed for featured soloists.</p>
+          <p>Count Basie's Kansas City band brought a bluesier, more relaxed swing, while <strong>Glenn Miller</strong> created a smoother, more pop-oriented sound. <strong>Artie Shaw</strong> was arguably the most technically accomplished clarinetist of the era.</p>
+        </div>
+        <div>
+          <div class="info-box">
+            <div class="info-label">Did You Know</div>
+            <p><strong>Swing dancing</strong> — Lindy Hop, Jitterbug, Balboa — grew directly from this music. These dances, developed in Harlem's Savoy Ballroom, remain practiced worldwide. The Savoy was also notable for being racially integrated when most of America was not.</p>
+          </div>
+          <div class="key-figures">
+            <span class="key-figure-tag">Count Basie</span>
+            <span class="key-figure-tag">Benny Goodman</span>
+            <span class="key-figure-tag">Glenn Miller</span>
+            <span class="key-figure-tag">Coleman Hawkins</span>
+            <span class="key-figure-tag">Lester Young</span>
+            <span class="key-figure-tag">Billie Holiday</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BEBOP -->
+  <section class="era-section">
+    <div class="container">
+      <div class="era-header">
+        <div class="era-year">1940s</div>
+        <div class="era-title">
+          <h2>Bebop — The Revolution</h2>
+        </div>
+      </div>
+      <div class="reveal">
+        <p>Young musicians — particularly <strong>Charlie "Bird" Parker</strong> and <strong>Dizzy Gillespie</strong> — were dissatisfied with swing's commercialism. Late-night jam sessions at Harlem clubs like Minton's Playhouse became laboratories for a new kind of jazz: faster tempos, complex chord changes, virtuosic melodic improvisation. Bebop was explicitly a <em>musicians' music</em>, not dance music.</p>
+        <p>Bebop's harmonic language was revolutionary. Musicians began adding extensions (9ths, 11ths, 13ths) to chords, substituting chords with distant harmonies, and playing with the meter in ways that kept even fellow musicians on their toes. The bebop melody — technically called the "head" — was often so rapid and complex it seemed unsingable.</p>
+      </div>
+      <div class="chord-box reveal">
+        <span class="chord-label">Bebop Signature — Fast lines over complex changes</span>
+        <p style="color: rgba(250,245,232,0.8); font-size: 0.9rem;">Beboppers played over "rhythm changes" (the chord progression of Gershwin's "I Got Rhythm") and complex standards at tempos of 300+ BPM. Charlie Parker's "Ko-Ko" (1945) at ♩=300 bpm remains a benchmark of technical mastery.</p>
+        <div class="chord-notation">
+          <span class="note">Cmaj7</span><span class="interval">→</span>
+          <span class="note">Am7</span><span class="interval">→</span>
+          <span class="note">Dm7</span><span class="interval">→</span>
+          <span class="note">G7♭9</span><span class="interval">→</span>
+          <span class="note">Cmaj7</span>
+          <span class="interval" style="margin-left:1rem;color:var(--gold-lt);">played at ♩=280+</span>
+        </div>
+      </div>
+      <div class="key-figures reveal">
+        <span class="key-figure-tag">Charlie Parker — alto sax</span>
+        <span class="key-figure-tag">Dizzy Gillespie — trumpet</span>
+        <span class="key-figure-tag">Thelonious Monk — piano</span>
+        <span class="key-figure-tag">Bud Powell — piano</span>
+        <span class="key-figure-tag">Max Roach — drums</span>
+        <span class="key-figure-tag">Kenny Clarke — drums</span>
+        <span class="key-figure-tag">Charles Mingus — bass</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- COOL JAZZ -->
+  <section class="era-section">
+    <div class="container">
+      <div class="era-header">
+        <div class="era-year">1950s</div>
+        <div class="era-title">
+          <h2>Cool Jazz &amp; West Coast</h2>
+        </div>
+      </div>
+      <div class="two-col reveal">
+        <div>
+          <p><strong>Miles Davis</strong>'s 1949–50 sessions — released as <em>Birth of the Cool</em> — were a deliberate counter to bebop's intensity. The approach was lighter, more lyrical, with an almost classical restraint. The nonet Davis assembled included musicians from diverse backgrounds, including arranger <strong>Gil Evans</strong> who brought an orchestral sensibility.</p>
+          <p>On the West Coast, the "cool" aesthetic flourished at clubs and in the recording studios of California. <strong>Dave Brubeck</strong> experimented with unusual time signatures (his "Take Five" is in 5/4), <strong>Paul Desmond</strong>'s alto sax had the lightness of a feather, and <strong>Chet Baker</strong>'s introspective trumpet and vocals defined a melancholy cool.</p>
+        </div>
+        <div>
+          <p><strong>Lennie Tristano</strong> and his circle took cool jazz into more abstract, contrapuntal territory — foreshadowing free jazz. Meanwhile, classical musicians began crossing over: pianist <strong>Erroll Garner</strong> and the <strong>Modern Jazz Quartet</strong> (led by John Lewis) brought chamber music precision to jazz.</p>
+          <div class="info-box">
+            <div class="info-label">East vs West</div>
+            <p>The cool/West Coast school was sometimes contrasted with the "harder" East Coast bebop scene — though this is largely a critical construct. Many musicians worked both coasts.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HARD BOP + MODAL -->
+  <section class="era-section">
+    <div class="container">
+      <div class="era-header">
+        <div class="era-year">Late 1950s</div>
+        <div class="era-title">
+          <h2>Hard Bop &amp; Modal Jazz</h2>
+        </div>
+      </div>
+      <div class="reveal">
+        <p><strong>Hard bop</strong> was a reaction to cool jazz's perceived "whitening" of the music. Players like <strong>Clifford Brown</strong>, <strong>Art Blakey</strong>, <strong>Horace Silver</strong>, and the young <strong>Miles Davis</strong> reinjected blues and gospel feeling into bebop's harmonic language. Blakey's Jazz Messengers became a legendary incubator for young talent.</p>
+        <p>Then in 1959, two albums changed everything. Miles Davis's <em>Kind of Blue</em> introduced <strong>modal jazz</strong> — improvising over scales (modes) rather than fast-moving chord changes. This opened up vast new space for melodic exploration. John Coltrane — who appeared on that album — pushed this idea further on <em>A Love Supreme</em> (1964), turning modal jazz into spiritual music.</p>
+        <div class="tip-box">
+          <div class="tip-label">The Modal Revolution</div>
+          <p>Instead of navigating chord changes every two beats at 250 BPM, modal jazz might sit on a single Dorian scale for 16 bars. This gave improvisers room to develop ideas, explore texture, and create melodic narratives. It was both simpler harmonically and infinitely deeper musically.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FREE JAZZ -->
+  <section class="era-section">
+    <div class="container">
+      <div class="era-header">
+        <div class="era-year">1960s</div>
+        <div class="era-title">
+          <h2>Free Jazz — The Liberation</h2>
+        </div>
+      </div>
+      <div class="reveal">
+        <p><strong>Ornette Coleman</strong>'s 1960 album <em>Free Jazz</em> (featuring two quartets playing simultaneously) announced a complete break from harmonic, rhythmic and formal conventions. Free jazz rejected not just chord changes but time, meter, and even conventional pitch relationships. It was radical, controversial, and aligned with the civil rights movement's energy.</p>
+        <p>Albert Ayler played tenor sax like a man possessed by spirits. <strong>Cecil Taylor</strong> treated the piano as a percussion instrument, creating dense, complex soundscapes. The <strong>Art Ensemble of Chicago</strong> incorporated African instruments, theatrics, and a vast range of sonic possibilities. Free jazz remains the most challenging corner of the genre — and arguably its most consequential philosophical statement.</p>
+        <div class="key-figures">
+          <span class="key-figure-tag">Ornette Coleman</span>
+          <span class="key-figure-tag">John Coltrane (late period)</span>
+          <span class="key-figure-tag">Cecil Taylor</span>
+          <span class="key-figure-tag">Albert Ayler</span>
+          <span class="key-figure-tag">Sun Ra</span>
+          <span class="key-figure-tag">Pharoah Sanders</span>
+          <span class="key-figure-tag">Archie Shepp</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FUSION -->
+  <section class="era-section">
+    <div class="container">
+      <div class="era-header">
+        <div class="era-year">1970s</div>
+        <div class="era-title">
+          <h2>Jazz Fusion — Going Electric</h2>
+        </div>
+      </div>
+      <div class="two-col reveal">
+        <div>
+          <p>Miles Davis — again the catalyst — picked up an electric keyboard and surrounded himself with rock rhythms and Sly Stone-influenced grooves. <em>Bitches Brew</em> (1970) was simultaneously his most controversial and best-selling album. It fused jazz improvisation with rock's electric instruments and funk's rhythmic insistence.</p>
+          <p>Groups like <strong>Weather Report</strong> (Wayne Shorter, Joe Zawinul), <strong>Mahavishnu Orchestra</strong> (John McLaughlin), and <strong>Return to Forever</strong> (Chick Corea) took fusion into increasingly virtuosic and complex territory. Guitarist McLaughlin brought Indian music into the mix; Herbie Hancock found the intersection of funk and jazz harmony.</p>
+        </div>
+        <div>
+          <div class="info-box">
+            <div class="info-label">Global Reach</div>
+            <p>Fusion's embrace of rock, funk, and world music made jazz internationally exportable again. Brazilian, African, and Indian musicians found fusion a natural meeting point with their own traditions.</p>
+          </div>
+          <div class="key-figures">
+            <span class="key-figure-tag">Miles Davis (electric)</span>
+            <span class="key-figure-tag">Wayne Shorter</span>
+            <span class="key-figure-tag">Joe Zawinul</span>
+            <span class="key-figure-tag">John McLaughlin</span>
+            <span class="key-figure-tag">Chick Corea</span>
+            <span class="key-figure-tag">Herbie Hancock</span>
+            <span class="key-figure-tag">Jaco Pastorius</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTEMPORARY -->
+  <section class="era-section">
+    <div class="container">
+      <div class="era-header">
+        <div class="era-year">Now</div>
+        <div class="era-title">
+          <h2>Contemporary Jazz — Infinite Directions</h2>
+        </div>
+      </div>
+      <div class="reveal">
+        <p>Today's jazz scene is thriving and deliberately pluralistic. The <strong>Wynton Marsalis</strong>-led neobop revival of the 1980s re-established bebop values; the Nu Jazz/Acid Jazz movement of the '90s (Courtney Pine, US3, Incognito) brought jazz back to dancefloors. The London scene — centred around <strong>GoGo Penguin</strong>, <strong>Shabaka Hutchings</strong>, and <strong>Nubya Garcia</strong> — blends jazz with grime, UK bass music, and Afrobeat.</p>
+        <p>Los Angeles saxophonist <strong>Kamasi Washington</strong> bridged jazz and hip-hop communities. <strong>Esperanza Spalding</strong> brought jazz bass virtuosity to a pop audience. <strong>Robert Glasper</strong> explored jazz's relationship with neo-soul and hip-hop. And in New York, pianists like <strong>Jason Moran</strong> and <strong>Brad Mehldau</strong> continue expanding the piano trio tradition into new territories.</p>
+        <p>Jazz is not a museum exhibit. It is happening right now, tonight, in thousands of clubs, concert halls, and studios across every continent.</p>
+      </div>
+    </div>
+  </section>
+
+</div><!-- end page-wrapper -->
+
+<footer>
+  <div class="container">
+    <div class="footer-deco">♪ ♫ ♩ ♬</div>
+    <p>Jazz Almanac — A celebration of the world's greatest improvisational art form.</p>
+    <p class="mt-2"><a href="index.html">Home</a> · <a href="history.html">History</a> · <a href="styles-players.html">Styles</a> · <a href="theory.html">Theory</a> · <a href="beginners.html">Beginners</a> · <a href="neuroscience.html">Neuroscience</a></p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

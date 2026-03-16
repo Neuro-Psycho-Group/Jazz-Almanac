@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jazz Almanac — The Complete Guide to Jazz</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/nav.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <style>
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      background: var(--ink);
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero .notes-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .hero-bg-text {
+      position: absolute;
+      right: -2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-display);
+      font-size: clamp(8rem, 20vw, 18rem);
+      font-weight: 900;
+      font-style: italic;
+      color: rgba(184,131,42,0.06);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      padding-top: var(--nav-h);
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      color: var(--gold);
+      font-size: 0.85rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      width: 40px;
+      height: 1px;
+      background: var(--gold);
+    }
+    .hero h1 {
+      color: var(--cream);
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      line-height: 1.05;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 .accent { color: var(--gold-lt); display: block; }
+    .hero .hero-desc {
+      color: rgba(250,245,232,0.75);
+      font-size: 1.2rem;
+      max-width: 52ch;
+      margin-bottom: 2.5rem;
+      line-height: 1.8;
+    }
+    .hero .waveform { margin-bottom: 2.5rem; }
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .btn {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 0.85rem 2rem;
+      border-radius: var(--radius);
+      transition: all 0.25s;
+      cursor: pointer;
+    }
+    .btn-gold {
+      background: var(--gold);
+      color: var(--ink);
+      border: 2px solid var(--gold);
+    }
+    .btn-gold:hover {
+      background: var(--gold-lt);
+      border-color: var(--gold-lt);
+      color: var(--ink);
+      text-decoration: none;
+      transform: translateY(-2px);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--cream);
+      border: 2px solid rgba(250,245,232,0.3);
+    }
+    .btn-outline:hover {
+      border-color: var(--gold);
+      color: var(--gold-lt);
+      text-decoration: none;
+      transform: translateY(-2px);
+    }
+
+    /* Vinyl Record Visual */
+    .vinyl-wrapper {
+      position: absolute;
+      right: 8%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: clamp(220px, 30vw, 380px);
+      height: clamp(220px, 30vw, 380px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    @media (max-width: 900px) { .vinyl-wrapper { display: none; } }
+
+    .vinyl {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      cursor: pointer;
+    }
+    .vinyl-disc {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: 
+        radial-gradient(circle at center, #2a2a2a 15%, transparent 16%),
+        radial-gradient(circle at center, #111 18%, transparent 19%),
+        repeating-radial-gradient(circle at center, 
+          #0d0d0d, #0d0d0d 2px, 
+          #1a1a1a 2px, #1a1a1a 4px
+        );
+      box-shadow: 0 0 60px rgba(0,0,0,0.6), 0 0 120px rgba(184,131,42,0.1);
+      animation: spin 6s linear infinite;
+    }
+    .vinyl-label {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 32%;
+      height: 32%;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--gold-dk), var(--gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-style: italic;
+      font-size: clamp(0.5rem, 1.5vw, 0.85rem);
+      line-height: 1.2;
+    }
+    .vinyl-needle {
+      position: absolute;
+      right: -10px;
+      top: 15%;
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), rgba(184,131,42,0.3));
+      border-radius: 2px;
+      transform-origin: right center;
+      transform: rotate(30deg);
+    }
+    .vinyl-needle::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    /* ── Intro Quote ── */
+    .intro-quote {
+      background: var(--paper);
+      padding: 5rem 0;
+      position: relative;
+    }
+    .pull-quote {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      color: var(--ink);
+      text-align: center;
+      max-width: 28ch;
+      margin: 0 auto;
+      line-height: 1.4;
+      position: relative;
+    }
+    .pull-quote::before, .pull-quote::after {
+      content: '"';
+      font-size: 6rem;
+      color: var(--gold);
+      opacity: 0.25;
+      font-family: var(--font-display);
+      line-height: 0;
+      position: absolute;
+    }
+    .pull-quote::before { top: 2rem; left: -1rem; }
+    .pull-quote::after  { content: '"'; bottom: -2rem; right: -1rem; }
+    .quote-attr {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2rem;
+    }
+
+    /* ── Nav Cards ── */
+    .nav-cards {
+      padding: 5rem 0;
+    }
+    .nav-cards h2 {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .nav-cards .subtitle-text {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 3rem;
+      font-size: 1.05rem;
+    }
+    .section-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .section-card {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-decoration: none;
+      color: var(--ink);
+      display: block;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .section-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--card-accent, var(--gold));
+    }
+    .section-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .section-card .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .section-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+    }
+    .section-card p {
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+    .section-card .card-arrow {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      font-size: 1.2rem;
+      color: var(--gold);
+      transition: transform 0.2s;
+    }
+    .section-card:hover .card-arrow { transform: translate(3px, -3px); }
+
+    /* ── Facts Strip ── */
+    .facts-strip {
+      background: var(--ink);
+      padding: 3rem 0;
+    }
+    .facts-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      text-align: center;
+    }
+    @media (max-width: 700px) { .facts-grid { grid-template-columns: repeat(2, 1fr); } }
+    .fact-item .fact-num {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--gold-lt);
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+    .fact-item .fact-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(250,245,232,0.5);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="logo-note">♪</span> Jazz Almanac</a>
+    <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="history.html">History</a></li>
+      <li><a href="styles-players.html">Styles &amp; Players</a></li>
+      <li><a href="theory.html">Theory</a></li>
+      <li><a href="beginners.html">For Beginners</a></li>
+      <li><a href="neuroscience.html">Neuroscience</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="notes-container"></div>
+  <div class="hero-bg-text">JAZZ</div>
+
+  <div class="hero-inner">
+    <div class="hero-eyebrow">The Complete Almanac</div>
+    <h1>
+      The World of<br/>
+      <span class="accent shimmer-text">Jazz</span>
+    </h1>
+    <p class="hero-desc">
+      From the swamps of New Orleans to the concert halls of São Paulo — 
+      explore the history, theory, neuroscience, and living art of the greatest 
+      improvisational music ever made.
+    </p>
+    <div class="waveform"></div>
+    <div class="hero-cta">
+      <a href="history.html" class="btn btn-gold">Start with History</a>
+      <a href="beginners.html" class="btn btn-outline">I'm a Beginner →</a>
+    </div>
+  </div>
+
+  <div class="vinyl-wrapper">
+    <div class="vinyl">
+      <div class="vinyl-disc vinyl-spin"></div>
+      <div class="vinyl-label">JAZZ<br/>Almanac</div>
+      <div class="vinyl-needle"></div>
+    </div>
+  </div>
+</section>
+
+<!-- PULL QUOTE -->
+<section class="intro-quote">
+  <div class="container">
+    <p class="pull-quote reveal">
+      Jazz is not just music, it's a way of life, it's a way of looking at the world.
+    </p>
+    <p class="quote-attr reveal">— Ray Charles</p>
+  </div>
+</section>
+
+<!-- SECTION CARDS -->
+<section class="nav-cards">
+  <div class="container">
+    <h2 class="reveal">Explore Every Dimension</h2>
+    <p class="subtitle-text reveal">Six deep dives into the art, science and soul of jazz</p>
+
+    <div class="section-cards">
+
+      <a href="history.html" class="section-card reveal" style="--card-accent: #B8832A;">
+        <span class="card-icon">🎺</span>
+        <h3>History of Jazz</h3>
+        <p>From Congo Square in 1900s New Orleans through Bebop, Cool, Fusion and beyond — trace 130 years of revolution.</p>
+        <span class="card-arrow">↗</span>
+      </a>
+
+      <a href="styles-players.html" class="section-card reveal" style="--card-accent: #1A5C6B;">
+        <span class="card-icon">🌍</span>
+        <h3>Styles &amp; Players</h3>
+        <p>From Miles Davis to Coltrane, Astrid Gilberto to Irakere — the players and regional styles that shaped the globe.</p>
+        <span class="card-arrow">↗</span>
+      </a>
+
+      <a href="theory.html" class="section-card reveal" style="--card-accent: #8B3A2A;">
+        <span class="card-icon">🎼</span>
+        <h3>Music Theory</h3>
+        <p>ii–V–I progressions, altered scales, tritone substitutions, chord voicings — the harmonic language of jazz decoded.</p>
+        <span class="card-arrow">↗</span>
+      </a>
+
+      <a href="beginners.html" class="section-card reveal" style="--card-accent: #5A7A3A;">
+        <span class="card-icon">🎹</span>
+        <h3>For Beginners</h3>
+        <p>Especially designed for classically trained musicians making the leap — unlearn, relearn, and start improvising.</p>
+        <span class="card-arrow">↗</span>
+      </a>
+
+      <a href="neuroscience.html" class="section-card reveal" style="--card-accent: #6B3A8B;">
+        <span class="card-icon">🧠</span>
+        <h3>Neuroscience of Jazz</h3>
+        <p>What happens in the brain during improvisation? The science of flow states, musical minds, and creative spontaneity.</p>
+        <span class="card-arrow">↗</span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- FACTS STRIP -->
+<section class="facts-strip">
+  <div class="container">
+    <div class="facts-grid">
+      <div class="fact-item">
+        <div class="fact-num">~130</div>
+        <div class="fact-label">Years of History</div>
+      </div>
+      <div class="fact-item">
+        <div class="fact-num">50+</div>
+        <div class="fact-label">Distinct Sub-genres</div>
+      </div>
+      <div class="fact-item">
+        <div class="fact-num">100s</div>
+        <div class="fact-label">Legendary Players</div>
+      </div>
+      <div class="fact-item">
+        <div class="fact-num">∞</div>
+        <div class="fact-label">Possible Improvisations</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-deco">♪ ♫ ♩ ♬</div>
+    <p>Jazz Almanac — A celebration of the world's greatest improvisational art form.</p>
+    <p class="mt-2"><a href="index.html">Home</a> · <a href="history.html">History</a> · <a href="styles-players.html">Styles</a> · <a href="theory.html">Theory</a> · <a href="beginners.html">Beginners</a> · <a href="neuroscience.html">Neuroscience</a></p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
